@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ScheduleApi.Data;
 using ScheduleApi.Models;
 
 namespace ScheduleApi.Controllers {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class ScheduleController : ControllerBase {
+    public class SchedulesController : ControllerBase {
         private readonly ScheduleDbContext _context;
-        public ScheduleController(ScheduleDbContext context) {
+        public SchedulesController(ScheduleDbContext context) {
             _context = context;
         }
 
@@ -49,7 +51,7 @@ namespace ScheduleApi.Controllers {
         }
 
         [HttpGet("employee-day-schedule")]
-        [ProducesResponseType(typeof(IEnumerable<Schedule>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Schedule), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetEmployeeDaySchedule(int id, int day, int week, int year) {
@@ -63,18 +65,44 @@ namespace ScheduleApi.Controllers {
             }
         }
 
-
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Create(int id, int day, int week, int year) {
+        public async Task<IActionResult> Create(Schedule schedule) {
+            try {
+                await _context.Schedules.AddAsync(schedule);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetEmployeeDaySchedule),
+                    new {
+                        EmployeeId = schedule.EmployeeId,
+                        Day = schedule.Day,
+                        Week = schedule.Week,
+                        Year = schedule.Year
+                    },
+                    schedule);
+            } catch (Exception ex) {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
+        [HttpPost("employee-day-schedule")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateEmployeeSchedule(int id, int day, int week, int year) {
             try {
                 Schedule schedule = new Schedule(id, day, week, year);
                 await _context.Schedules.AddAsync(schedule);
                 await _context.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetEmployeeDaySchedule),
-                    new { EmployeeId = id, Day = day, Week = week, Year = year },
+                    new {
+                        EmployeeId = id,
+                        Day = day,
+                        Week = week,
+                        Year = year
+                    },
                     schedule);
             } catch (Exception ex) {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
@@ -90,6 +118,24 @@ namespace ScheduleApi.Controllers {
 
             try {
                 _context.Entry(schedule).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            } catch (Exception ex) {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Delete(int id) {
+            try {
+                var toDelete = await _context.Schedules.FindAsync(id);
+                if (toDelete == null) return NotFound();
+
+                _context.Schedules.Remove(toDelete);
                 await _context.SaveChangesAsync();
 
                 return NoContent();

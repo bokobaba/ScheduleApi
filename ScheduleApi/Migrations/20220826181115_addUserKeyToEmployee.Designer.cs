@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScheduleApi.Data;
 
@@ -11,9 +12,10 @@ using ScheduleApi.Data;
 namespace ScheduleApi.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220826181115_addUserKeyToEmployee")]
+    partial class addUserKeyToEmployee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,15 +39,12 @@ namespace ScheduleApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("UserID")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("EmployeeId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserID");
 
                     b.ToTable("Employees");
                 });
@@ -75,7 +74,7 @@ namespace ScheduleApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
-                    b.Property<int>("EmployeeId")
+                    b.Property<int?>("EmployeeID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("End")
@@ -86,7 +85,7 @@ namespace ScheduleApi.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("EmployeeID");
 
                     b.ToTable("Requests");
                 });
@@ -157,7 +156,7 @@ namespace ScheduleApi.Migrations
                 {
                     b.HasOne("ScheduleApi.Models.User", "User")
                         .WithMany("Employee")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -168,10 +167,7 @@ namespace ScheduleApi.Migrations
                 {
                     b.HasOne("ScheduleApi.Models.Employee", "Employee")
                         .WithMany("Requests")
-                        .HasForeignKey("EmployeeId")
-                        .HasPrincipalKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EmployeeID");
 
                     b.Navigation("Employee");
                 });

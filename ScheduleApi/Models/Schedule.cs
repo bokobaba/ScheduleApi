@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ScheduleApi.Models {
     public class Schedule {
         [Key]
-        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
         [Required]
         public int EmployeeId { get; set; }
@@ -18,6 +18,10 @@ namespace ScheduleApi.Models {
         public DateTime Start { get; set; }
         [Required]
         public DateTime End { get; set; }
+
+        public Schedule() {
+
+        }
 
         public Schedule(int employeeId, int day, int week, int year) {
             EmployeeId = employeeId;

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScheduleApi.Data;
 
@@ -11,9 +12,10 @@ using ScheduleApi.Data;
 namespace ScheduleApi.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220828173740_addedEmployeeReqeustDelete")]
+    partial class addedEmployeeReqeustDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -169,7 +171,6 @@ namespace ScheduleApi.Migrations
                     b.HasOne("ScheduleApi.Models.Employee", "Employee")
                         .WithMany("Requests")
                         .HasForeignKey("EmployeeId")
-                        .HasPrincipalKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
