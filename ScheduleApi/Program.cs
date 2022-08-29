@@ -8,6 +8,7 @@ using ScheduleApi.Services.AuthService;
 using ScheduleApi.Services.EmployeeService;
 using ScheduleApi.Services.RequestService;
 using Swashbuckle.AspNetCore.Filters;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +46,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+    options.Events = new JwtBearerEvents();
+    options.Events.OnTokenValidated = async (context) => {
+        string ipAddress = context.Request.HttpContext.Connection.RemoteIpAddress.ToString();
+        IAuthService authService = context.Request.HttpContext.RequestServices.GetService<IAuthService>();
+        JwtSecurityToken jwtToken = context.SecurityToken as JwtSecurityToken;
+        if (!await authService.IsTokenIpAddressValid(jwtToken.RawData, ipAddress)) {
+            context.Fail("Invalid Token Details");
+        }
     };
 });
 

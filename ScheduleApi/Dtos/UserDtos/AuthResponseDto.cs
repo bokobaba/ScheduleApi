@@ -1,5 +1,5 @@
-﻿namespace ScheduleApi.Models {
-    public class TokenResponse {
+﻿namespace ScheduleApi.Dtos.UserDtos {
+    public class AuthResponseDto {
         public string Token { get; set; }
         public string RefreshToken { get; set; }
     }

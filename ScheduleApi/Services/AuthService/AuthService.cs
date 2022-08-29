@@ -12,13 +12,16 @@ namespace ScheduleApi.Services.AuthService {
     public class AuthService : IAuthService {
         private readonly ScheduleDbContext _context;
         private readonly IConfiguration _config;
+        private readonly IHttpContextAccessor _contextAccessor;
 
-        public AuthService(ScheduleDbContext context, IConfiguration config) {
+        public AuthService(ScheduleDbContext context, IConfiguration config,
+            IHttpContextAccessor contextAccessor) {
             _context = context;
             _config = config;
+            _contextAccessor = contextAccessor;
         }
 
-        public async Task<string> Login(UserLoginDto userLogin) {
+        public async Task<AuthResponseDto> Login(UserLoginDto userLogin) {
             User? user = await _context.Users.FirstOrDefaultAsync(
                 u => u.EmailAddress.ToLower() == userLogin.EmailAddress.ToLower());
 
@@ -31,10 +34,17 @@ namespace ScheduleApi.Services.AuthService {
                 throw new AppException("invalid password");
             }
 
-            return GenerateToken(user);
+            string refreshToken = GenerateRefreshToken();
+            string token = GenerateToken(user);
+            await SaveRefreshToken(user, refreshToken, token);
+
+            return new AuthResponseDto {
+                Token = token,
+                RefreshToken = refreshToken
+            };
         }
 
-        public async Task<Guid> Register(UserRegisterDto userRegister) {
+        public async Task<RegisterResponseDto> Register(UserRegisterDto userRegister) {
             CreatePasswordHash(userRegister.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
             if (await UserExists(userRegister.EmailAddress)) {
@@ -52,7 +62,10 @@ namespace ScheduleApi.Services.AuthService {
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return user.ID;
+            return new RegisterResponseDto {
+                Username = userRegister.Username,
+                EmailAddress = userRegister.EmailAddress
+            };
         }
 
         public async Task<bool> UserExists(string email) {
@@ -62,16 +75,84 @@ namespace ScheduleApi.Services.AuthService {
             return false;
         }
 
+        public async Task<AuthResponseDto> RefreshToken(RefreshTokenRequest request) {
+            User user = await GetUserFromRefreshToken(request);
+
+            var refreshToken = GenerateRefreshToken();
+            var accessToken = GenerateToken(user);
+
+            await SaveRefreshToken(user, refreshToken, accessToken);
+
+            return new AuthResponseDto {
+                RefreshToken = refreshToken,
+                Token = accessToken
+            };
+        }
+
+        private async Task SaveRefreshToken(User user, string refreshToken, string token) {
+            var userRefreshToken = new UserRefreshToken() {
+                Token = token,
+                RefreshToken = refreshToken,
+                Expires = DateTime.UtcNow.AddDays(7),
+                Created = DateTime.UtcNow,
+                IpAddress = _contextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+                IsInvalidated = false,
+                UserId = user.ID,
+            };
+
+            _context.RefreshTokens.Add(userRefreshToken);
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<User> GetUserFromRefreshToken(RefreshTokenRequest request) {
+            var token = GetJwtToken(request.ExpiredToken);
+
+            UserRefreshToken? userRefreshToken = _context.RefreshTokens
+                .Include(r => r.User)
+                .FirstOrDefault(
+                r => r.IsInvalidated == false && 
+                r.Token == request.ExpiredToken &&
+                r.RefreshToken == request.RefreshToken && 
+                r.IpAddress == _contextAccessor.HttpContext.Connection.RemoteIpAddress.ToString());
+
+            if (userRefreshToken.User == null)
+                throw new AppException("Invalid token Details");
+
+            ValidateDetails(token, userRefreshToken);
+
+            userRefreshToken.IsInvalidated = true;
+            await _context.SaveChangesAsync();
+
+            return userRefreshToken.User;
+        }
+
+        private void ValidateDetails(JwtSecurityToken token, UserRefreshToken? userRefreshToken) {
+            if (userRefreshToken == null)
+                throw new AppException("Invalid token Details");
+            if (token.ValidTo > DateTime.UtcNow)
+                throw new AppException("Token not expired");
+            if (!userRefreshToken.IsActive)
+                throw new AppException("Refresh Token Expired");
+
+        }
+
+        public async Task<bool> IsTokenIpAddressValid(string accessToken, string ipAddress) {
+            bool isValid = _context.RefreshTokens.FirstOrDefaultAsync(
+                r => r.Token == accessToken &&
+                r.IpAddress == ipAddress) != null;
+            return await Task.FromResult(isValid);
+        }
+
         private static void CreatePasswordHash(string password, out byte[] passwordHash,
             out byte[] passwordSalt) {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512()) {
+            using (var hmac = new HMACSHA512()) {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
         }
 
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt) {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt)) {
+            using (var hmac = new HMACSHA512(passwordSalt)) {
                 byte[] computeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
 
                 return computeHash.SequenceEqual(passwordHash);
@@ -93,28 +174,19 @@ namespace ScheduleApi.Services.AuthService {
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private UserRefreshToken GenerateRefreshToken() {
-            var refreshToken = new UserRefreshToken() {
-                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-                Expires = DateTime.Now.AddDays(7),
-                Created = DateTime.Now
-            };
-
-            return refreshToken;
+        private string GenerateRefreshToken() {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
 
-        private void SetRefreshToken(UserRefreshToken newRefreshToken) {
-            var cookieOptions = new CookieOptions {
-                HttpOnly = true,
-                Expires = newRefreshToken.Expires
-            };
-
+        private JwtSecurityToken GetJwtToken(string expiredToken) {
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            return tokenHandler.ReadJwtToken(expiredToken);
         }
     }
 }

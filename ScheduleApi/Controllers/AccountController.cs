@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ScheduleApi.Dtos.UserDtos;
 using ScheduleApi.Services.AuthService;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ScheduleApi.Controllers {
     [Route("api/[controller]")]
@@ -12,24 +13,32 @@ namespace ScheduleApi.Controllers {
             _service = service;
         }
 
-        [HttpPost("register")]
-        [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+        [HttpPost("[action]")]
+        [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Guid>> Register(UserRegisterDto request) {
-            Guid response = await _service.Register(request);
+        public async Task<ActionResult<RegisterResponseDto>> Register(UserRegisterDto request) {
+            RegisterResponseDto response = await _service.Register(request);
 
             return Ok(response);
         }
 
-        [HttpPost("login")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [HttpPost("[action]")]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<string>> Login(UserLoginDto request) {
-            string response = await _service.Login(request);
+        public async Task<ActionResult<AuthResponseDto>> Login(UserLoginDto request) {
+            AuthResponseDto response = await _service.Login(request);
 
             return Ok(response);
         }
 
+        [HttpPost("[action]")]
+        [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<AuthResponseDto>> RefreshToken([FromBody] RefreshTokenRequest request) {
+            AuthResponseDto response = await _service.RefreshToken(request);
+
+            return Ok(response);
+        }
     }
 }

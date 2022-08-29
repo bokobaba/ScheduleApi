@@ -29,8 +29,16 @@ namespace ScheduleApi.Extensions {
             };
             switch (exception) {
                 case AppException ex:
-                    response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    errorResponse.Message = ex.Message;
+                    switch (ex.type) {
+                        case ExceptionType.FORBIDDEN:
+                            response.StatusCode = StatusCodes.Status403Forbidden;
+                            errorResponse.Message = ex.Message;
+                            break;
+                        default:
+                            response.StatusCode = (int)HttpStatusCode.BadRequest;
+                            errorResponse.Message = ex.Message;
+                            break;
+                    }
                     break;
                 case KeyNotFoundException ex:
                     response.StatusCode = (int)HttpStatusCode.NotFound;

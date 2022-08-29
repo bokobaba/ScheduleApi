@@ -2,8 +2,10 @@
 
 namespace ScheduleApi.Services.AuthService {
     public interface IAuthService {
-        public Task<Guid> Register(UserRegisterDto userRegister);
-        public Task<string> Login(UserLoginDto userLogin);
+        public Task<RegisterResponseDto> Register(UserRegisterDto userRegister);
+        public Task<AuthResponseDto> Login(UserLoginDto userLogin);
         public Task<bool> UserExists(string email);
+        public Task<AuthResponseDto> RefreshToken(RefreshTokenRequest request);
+        public Task<bool> IsTokenIpAddressValid(string accessToken, string ipAddress);
     }
 }

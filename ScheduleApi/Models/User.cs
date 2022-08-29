@@ -13,6 +13,7 @@ namespace ScheduleApi.Models {
         [Required]
         public byte[] PasswordSalt { get; set; }
         [Required]
+        [EmailAddress]
         public string EmailAddress { get; set; }
         [Required]
         public string Role { get; set; } = "Employee";
