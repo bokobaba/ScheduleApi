@@ -12,8 +12,8 @@ using ScheduleApi.Data;
 namespace ScheduleApi.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    [Migration("20220828190029_changedRequestEmployeeForeignKey3")]
-    partial class changedRequestEmployeeForeignKey3
+    [Migration("20220904162639_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -32,6 +32,10 @@ namespace ScheduleApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
+                    b.Property<string>("Affiliation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
@@ -39,34 +43,16 @@ namespace ScheduleApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
                     b.HasIndex("EmployeeId")
                         .IsUnique();
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("ScheduleApi.Models.RefreshToken", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
-
-                    b.Property<string>("token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("ScheduleApi.Models.Request", b =>
@@ -155,15 +141,43 @@ namespace ScheduleApi.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ScheduleApi.Models.Employee", b =>
+            modelBuilder.Entity("ScheduleApi.Models.UserRefreshToken", b =>
                 {
-                    b.HasOne("ScheduleApi.Models.User", "User")
-                        .WithMany("Employee")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Navigation("User");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsInvalidated")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("ScheduleApi.Models.Request", b =>
@@ -178,6 +192,17 @@ namespace ScheduleApi.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("ScheduleApi.Models.UserRefreshToken", b =>
+                {
+                    b.HasOne("ScheduleApi.Models.User", "User")
+                        .WithMany("UserRefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ScheduleApi.Models.Employee", b =>
                 {
                     b.Navigation("Requests");
@@ -185,7 +210,7 @@ namespace ScheduleApi.Migrations
 
             modelBuilder.Entity("ScheduleApi.Models.User", b =>
                 {
-                    b.Navigation("Employee");
+                    b.Navigation("UserRefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

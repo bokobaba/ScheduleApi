@@ -31,10 +31,10 @@ namespace ScheduleApi.Services.EmployeeService {
         public async Task<IEnumerable<GetEmployeeDto>?> GetAllEmployees() {
             IEnumerable<Employee>? employees = await _context.Employees
                 .Include(e => e.Requests)
-                .Where(e => e.User.ID == GetUserId(_contextAccessor))
+                .Where(e => e.UserId == GetUserId(_contextAccessor))
                 .ToListAsync();
 
-            return employees == null ? null : employees.Select(e => _mapper.Map<GetEmployeeDto>(e)).ToList();
+            return employees?.Select(e => _mapper.Map<GetEmployeeDto>(e)).ToList();
         }
 
         public async Task<GetEmployeeDto> GetEmployeeById(int id) {
@@ -62,8 +62,7 @@ namespace ScheduleApi.Services.EmployeeService {
 
             if (employee.Requests != null)
                 _context.Requests.RemoveRange(employee.Requests);
-            employee.Requests = updateEmployee.Requests == null ? null : 
-                updateEmployee.Requests.Select(r => _mapper.Map<Request>(r)).ToList();
+            employee.Requests = updateEmployee.Requests?.Select(r => _mapper.Map<Request>(r)).ToList();
 
             await _context.SaveChangesAsync();
 

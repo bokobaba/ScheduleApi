@@ -1,12 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ScheduleApi.Data;
-using ScheduleApi.Dtos.EmployeeDtos;
 using ScheduleApi.Dtos.RequestDtos;
-using ScheduleApi.Exceptions;
-using ScheduleApi.Migrations;
 using ScheduleApi.Models;
-using System.Linq;
 using static ScheduleApi.Utils.Utils;
 
 namespace ScheduleApi.Services.RequestService {
@@ -55,7 +51,7 @@ namespace ScheduleApi.Services.RequestService {
                 .Where(r => r.Employee.UserId == GetUserId(_contextAccessor))
                 .ToListAsync();
 
-            return requests == null ? null : requests.Select(r => _mapper.Map<GetRequestDto>(r)).ToList();
+            return requests?.Select(r => _mapper.Map<GetRequestDto>(r)).ToList();
         }
 
         public async Task<GetRequestDto> GetReqeustById(int id) {
@@ -75,7 +71,7 @@ namespace ScheduleApi.Services.RequestService {
                 .Where(r => r.EmployeeId == employeeId)
                 .ToListAsync();
 
-            return requests == null ? null : requests.Select(r => _mapper.Map<GetRequestDto>(r)).ToList();
+            return requests?.Select(r => _mapper.Map<GetRequestDto>(r)).ToList();
         }
 
         public async Task<GetRequestDto> UpdateRequest(UpdateRequestDto updateRequest) {

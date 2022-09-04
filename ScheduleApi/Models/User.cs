@@ -18,7 +18,7 @@ namespace ScheduleApi.Models {
         [Required]
         public string Role { get; set; } = "Employee";
 
-        public List<Employee>? Employee { get; set; }
+        //public List<Employee>? Employee { get; set; }
         public List<UserRefreshToken>? UserRefreshTokens { get; set; }
     }
 }

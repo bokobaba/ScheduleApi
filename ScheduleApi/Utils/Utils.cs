@@ -6,8 +6,16 @@ namespace ScheduleApi.Utils {
             return string.Format("{0} with id = {1} not found", type, id);
         }
 
-        public static Guid GetUserId(IHttpContextAccessor context) {
-            return Guid.Parse(context.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        public static string GetUserId(IHttpContextAccessor context) {
+            string result = context.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Console.WriteLine("result: " + result);
+            return result;
+        }
+
+        public static string GetUserAffiliation(IHttpContextAccessor context) {
+            string result = context.HttpContext.User.FindFirstValue("user_metadata");
+            Console.WriteLine("result: " + result);
+            return result;
         }
     }
 }

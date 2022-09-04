@@ -30,6 +30,10 @@ namespace ScheduleApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
+                    b.Property<string>("Affiliation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
@@ -37,15 +41,14 @@ namespace ScheduleApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
                     b.HasIndex("EmployeeId")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Employees");
                 });
@@ -175,17 +178,6 @@ namespace ScheduleApi.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("ScheduleApi.Models.Employee", b =>
-                {
-                    b.HasOne("ScheduleApi.Models.User", "User")
-                        .WithMany("Employee")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ScheduleApi.Models.Request", b =>
                 {
                     b.HasOne("ScheduleApi.Models.Employee", "Employee")
@@ -216,8 +208,6 @@ namespace ScheduleApi.Migrations
 
             modelBuilder.Entity("ScheduleApi.Models.User", b =>
                 {
-                    b.Navigation("Employee");
-
                     b.Navigation("UserRefreshTokens");
                 });
 #pragma warning restore 612, 618

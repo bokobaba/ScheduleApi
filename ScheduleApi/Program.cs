@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ScheduleApi.Data;
 using ScheduleApi.Extensions;
+using ScheduleApi.Filters;
 using ScheduleApi.Services.AuthService;
 using ScheduleApi.Services.EmployeeService;
 using ScheduleApi.Services.RequestService;
@@ -19,15 +20,16 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(c => {
-    c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {
+builder.Services.AddSwaggerGen(options => {
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {
         Description = "Standard Authorization header using the Bearer scheme, e.g. \"bearer {token} \"",
         In = ParameterLocation.Header,
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
     });
 
-    c.OperationFilter<SecurityRequirementsOperationFilter>();
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+    options.SchemaFilter<SwaggerSchemaFilter>();
 });
 
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -75,7 +77,7 @@ builder.Services.AddAuthentication(options => {
         //    }
         //};
     });
-
+Console.WriteLine("CONNECTION_STRING: " + builder.Configuration.GetConnectionString("DefaultConnection"));
 builder.Services.AddDbContext<ScheduleDbContext>(
     o => o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
