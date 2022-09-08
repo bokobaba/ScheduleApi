@@ -14,8 +14,8 @@ namespace ScheduleApi.Models {
         public string Name { get; set; }
         
         public string UserId { get; set; }
-        public string Affiliation { get; set; }
 
         public List<Request>? Requests { get; set; }
+        public List<Schedule>? Schedules { get; set; }
     }
 }

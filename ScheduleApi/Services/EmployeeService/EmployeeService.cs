@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using ScheduleApi.Data;
 using ScheduleApi.Dtos.EmployeeDtos;
-using ScheduleApi.Exceptions;
 using ScheduleApi.Models;
 using static ScheduleApi.Utils.Utils;
 

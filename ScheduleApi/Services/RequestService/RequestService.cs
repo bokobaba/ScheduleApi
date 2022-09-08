@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ScheduleApi.Data;
 using ScheduleApi.Dtos.RequestDtos;
+using ScheduleApi.Exceptions;
 using ScheduleApi.Models;
 using static ScheduleApi.Utils.Utils;
 
@@ -18,14 +19,9 @@ namespace ScheduleApi.Services.RequestService {
         }
 
         public async Task<GetRequestDto> AddRequest(AddRequestDto newRequest) {
+            await _context.CheckEmployeeUserValid(newRequest.EmployeeId, _contextAccessor);
+
             Request request = _mapper.Map<Request>(newRequest);
-
-            Employee? employee = await _context.Employees
-                .FirstOrDefaultAsync(e => e.ID == request.EmployeeId);
-
-            if (employee == null || employee.UserId != GetUserId(_contextAccessor)) {
-                throw new KeyNotFoundException(IdNotFoundMessage("employee", request.EmployeeId));
-            }
 
             _context.Requests.Add(request);
             await _context.SaveChangesAsync();
@@ -39,7 +35,7 @@ namespace ScheduleApi.Services.RequestService {
             if (toDelete == null)
                 throw new KeyNotFoundException(IdNotFoundMessage("request", id));
 
-            await _context.CheckRequestUserValid(id, toDelete.EmployeeId, _contextAccessor);
+            await _context.CheckUserValid("request", id, toDelete.EmployeeId, _contextAccessor);
 
             _context.Requests.Remove(toDelete);
             await _context.SaveChangesAsync();
@@ -59,7 +55,7 @@ namespace ScheduleApi.Services.RequestService {
             if (request == null)
                 throw new KeyNotFoundException(IdNotFoundMessage("request", id));
 
-            await _context.CheckRequestUserValid(id, request.EmployeeId, _contextAccessor);
+            await _context.CheckUserValid("request", id, request.EmployeeId, _contextAccessor);
 
             return _mapper.Map<GetRequestDto>(request);
         }
@@ -75,12 +71,18 @@ namespace ScheduleApi.Services.RequestService {
         }
 
         public async Task<GetRequestDto> UpdateRequest(UpdateRequestDto updateRequest) {
+            await _context.CheckEmployeeUserValid(updateRequest.EmployeeId, _contextAccessor);
+
             Request? request = await _context.Requests.FirstOrDefaultAsync(r => r.ID == updateRequest.ID);
 
             if (request == null)
                 throw new KeyNotFoundException(IdNotFoundMessage("request", updateRequest.ID));
 
-            await _context.CheckRequestUserValid(updateRequest.ID, request.EmployeeId, _contextAccessor);
+            if (request.EmployeeId != updateRequest.EmployeeId)
+                throw new AppException(string.Format(
+                    "employeeId = {0} does not match that of stored value = {1}",
+                    updateRequest.EmployeeId, request.EmployeeId));
+
 
             request.Start = updateRequest.Start;
             request.End = updateRequest.End;

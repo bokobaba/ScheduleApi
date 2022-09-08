@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScheduleApi.Data;
 
@@ -11,9 +12,10 @@ using ScheduleApi.Data;
 namespace ScheduleApi.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220907183147_changeScheduleIndexOrder")]
+    partial class changeScheduleIndexOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,7 +105,7 @@ namespace ScheduleApi.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.HasIndex("Week", "Year", "EmployeeId", "Day")
+                    b.HasIndex("Year", "Week", "Day", "EmployeeId")
                         .IsUnique();
 
                     b.ToTable("Schedules");

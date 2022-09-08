@@ -7,8 +7,6 @@ namespace ScheduleApi.Models {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
         [Required]
-        public int EmployeeId { get; set; }
-        [Required]
         public int Year { get; set; }
         [Required]
         public int Week { get; set; }
@@ -18,6 +16,9 @@ namespace ScheduleApi.Models {
         public DateTime Start { get; set; }
         [Required]
         public DateTime End { get; set; }
+
+        public int EmployeeId { get; set; }
+        public Employee Employee { get; set; }
 
         public Schedule() {
 

@@ -23,9 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Dtos\ScheduleDtos\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 
 </Project>

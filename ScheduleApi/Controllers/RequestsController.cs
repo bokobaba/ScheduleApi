@@ -27,15 +27,16 @@ namespace ScheduleApi.Controllers {
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(Request), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetRequestDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id) {
             return Ok(await _service.GetReqeustById(id));
         }
 
-        [HttpGet("get-employee-requests/{id}")]
-        [ProducesResponseType(typeof(IEnumerable<Request>), StatusCodes.Status200OK)]
+        [HttpGet("[action]/{employeeId}")]
+        [ProducesResponseType(typeof(IEnumerable<GetRequestDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> GetByEmployeeId(int employeeId) {
             IEnumerable<GetRequestDto>? response = await _service.GetReqeustsByEmployeeId(employeeId);
 
@@ -45,7 +46,7 @@ namespace ScheduleApi.Controllers {
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Create([FromBody] AddRequestDto request) {
+        public async Task<IActionResult> Create(AddRequestDto request) {
             GetRequestDto response = await _service.AddRequest(request);
 
             return CreatedAtAction(nameof(GetById),
@@ -56,18 +57,18 @@ namespace ScheduleApi.Controllers {
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(GetRequestDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateRequestDto request) {
+        public async Task<IActionResult> Update(int id, UpdateRequestDto request) {
             if (id != request.ID)
                 throw new AppException(
                     string.Format("id = {0} does not match that of the employee to update id = {1}",
                     id, request.ID));
 
-            await _service.UpdateRequest(request);
+            GetRequestDto response = await _service.UpdateRequest(request);
 
-            return NoContent();
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ScheduleApi.Data;
 
@@ -11,9 +12,10 @@ using ScheduleApi.Data;
 namespace ScheduleApi.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    partial class ScheduleDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220904195058_removeaffiliation")]
+    partial class removeaffiliation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,11 +103,6 @@ namespace ScheduleApi.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("EmployeeId");
-
-                    b.HasIndex("Week", "Year", "EmployeeId", "Day")
-                        .IsUnique();
-
                     b.ToTable("Schedules");
                 });
 
@@ -191,18 +188,6 @@ namespace ScheduleApi.Migrations
                     b.Navigation("Employee");
                 });
 
-            modelBuilder.Entity("ScheduleApi.Models.Schedule", b =>
-                {
-                    b.HasOne("ScheduleApi.Models.Employee", "Employee")
-                        .WithMany("Schedules")
-                        .HasForeignKey("EmployeeId")
-                        .HasPrincipalKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-                });
-
             modelBuilder.Entity("ScheduleApi.Models.UserRefreshToken", b =>
                 {
                     b.HasOne("ScheduleApi.Models.User", "User")
@@ -217,8 +202,6 @@ namespace ScheduleApi.Migrations
             modelBuilder.Entity("ScheduleApi.Models.Employee", b =>
                 {
                     b.Navigation("Requests");
-
-                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("ScheduleApi.Models.User", b =>

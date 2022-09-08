@@ -1,147 +1,98 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ScheduleApi.Data;
-using ScheduleApi.Models;
+using ScheduleApi.Dtos.RequestDtos;
+using ScheduleApi.Dtos.ScheduleDtos;
+using ScheduleApi.Exceptions;
+using ScheduleApi.Services.ScheduleService;
 
 namespace ScheduleApi.Controllers {
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SchedulesController : ControllerBase {
-        private readonly ScheduleDbContext _context;
-        public SchedulesController(ScheduleDbContext context) {
-            _context = context;
+        private readonly IScheduleService _service;
+
+        public SchedulesController(IScheduleService service) {
+            _service = service;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Schedule>> Get() {
-            return await _context.Schedules.ToListAsync();
+        public async Task<IActionResult> Get() {
+            IEnumerable<GetScheduleDto>? response = await _service.GetAllSchedules();
+
+            return response == null ? NoContent() : Ok(response);
         }
 
-        [HttpGet("weekly-schedule")]
-        [ProducesResponseType(typeof(IEnumerable<Schedule>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetWeeklySchedule(int week, int year) {
-            try {
-                var schedules = await _context.Schedules.Where(x =>
-                x.Week == week && x.Year == year).ToListAsync();
+        //[HttpGet("{id}")]
+        //[ProducesResponseType(typeof(GetScheduleDto), StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<IActionResult> GetById(int id) {
+        //    return Ok(await _service.GetScheduleById(id));
+        //}
 
-                return schedules == null ? NotFound() : Ok(schedules);
-            } catch (Exception ex) {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+        [HttpPost("[action]")]
+        [ProducesResponseType(typeof(IEnumerable<GetScheduleDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> EmployeeDaySchedule([FromBody] EmployeeDayScheduleDto request) {
+            GetScheduleDto response = await _service.GetScheduleByDayEmployee(request);
+
+            return Ok(response);
         }
 
-        [HttpGet("employee-weekly-schedule")]
-        [ProducesResponseType(typeof(IEnumerable<Schedule>), StatusCodes.Status200OK)]
+        [HttpPost("[action]")]
+        [ProducesResponseType(typeof(IEnumerable<GetScheduleDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetEmployeeWeeklySchedule(int id, int week, int year) {
-            try {
-                var schedules = await _context.Schedules.Where(x =>
-                x.EmployeeId == id && x.Week == week && x.Year == year).ToListAsync();
+        public async Task<IActionResult> WeeklySchedule(WeeklyScheduleDto request) {
+            IEnumerable<GetScheduleDto> schedules = await _service.GetSchedulesByWeek(request);
 
-                return schedules == null ? NotFound() : Ok(schedules);
-            } catch (Exception ex) {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            return Ok(schedules);
         }
 
-        [HttpGet("employee-day-schedule")]
-        [ProducesResponseType(typeof(Schedule), StatusCodes.Status200OK)]
+        [HttpPost("[action]")]
+        [ProducesResponseType(typeof(IEnumerable<GetScheduleDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetEmployeeDaySchedule(int id, int day, int week, int year) {
-            try {
-                var schedules = await _context.Schedules.Where(x =>
-                x.Day == day && x.EmployeeId == id && x.Week == week && x.Year == year).ToListAsync();
+        public async Task<IActionResult> EmployeeWeeklySchedule(EmployeeWeeklyScheduleDto request) {
+            IEnumerable<GetScheduleDto> schedules = await _service.GetSchedulesByWeekEmployee(request);
 
-                return schedules == null ? NotFound() : Ok(schedules);
-            } catch (Exception ex) {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            return Ok(schedules);
+        }
+
+        [HttpPost("[action]")]
+        [ProducesResponseType(typeof(IEnumerable<GetScheduleDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> SaveWeeklySchedule(SaveWeeklyScheduleDto request) {
+            IEnumerable<GetScheduleDto> schedules = await _service.SaveWeeklySchedule(request);
+
+            return Ok(schedules);
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Create(Schedule schedule) {
-            try {
-                await _context.Schedules.AddAsync(schedule);
-                await _context.SaveChangesAsync();
+        public async Task<IActionResult> Create(AddScheduleDto request) {
+            GetScheduleDto response = await _service.AddSchedule(request);
 
-                return CreatedAtAction(nameof(GetEmployeeDaySchedule),
-                    new {
-                        EmployeeId = schedule.EmployeeId,
-                        Day = schedule.Day,
-                        Week = schedule.Week,
-                        Year = schedule.Year
-                    },
-                    schedule);
-            } catch (Exception ex) {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            return CreatedAtAction(nameof(EmployeeDaySchedule), null,
+                response);
         }
 
-
-        [HttpPost("employee-day-schedule")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateEmployeeSchedule(int id, int day, int week, int year) {
-            try {
-                Schedule schedule = new Schedule(id, day, week, year);
-                await _context.Schedules.AddAsync(schedule);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(GetEmployeeDaySchedule),
-                    new {
-                        EmployeeId = id,
-                        Day = day,
-                        Week = week,
-                        Year = year
-                    },
-                    schedule);
-            } catch (Exception ex) {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-
-        [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [HttpPut]
+        [ProducesResponseType(typeof(GetRequestDto),StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateSchedule(int id, Schedule schedule) {
-            if (id != schedule.ID) return BadRequest();
+        public async Task<IActionResult> UpdateSchedule(UpdateScheduleDto request) {
+            GetScheduleDto response = await _service.UpdateSchedule(request);
 
-            try {
-                _context.Entry(schedule).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-
-                return NoContent();
-            } catch (Exception ex) {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            return Ok(response);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(int id) {
-            try {
-                var toDelete = await _context.Schedules.FindAsync(id);
-                if (toDelete == null) return NotFound();
+        public async Task<IActionResult> Delete(EmployeeDayScheduleDto request) {
+            await _service.DeleteSchedule(request);
 
-                _context.Schedules.Remove(toDelete);
-                await _context.SaveChangesAsync();
-
-                return NoContent();
-            } catch (Exception ex) {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
+            return NoContent();
         }
     }
 }

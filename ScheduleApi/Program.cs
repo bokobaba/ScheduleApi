@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ScheduleApi.Data;
 using ScheduleApi.Extensions;
@@ -8,9 +7,8 @@ using ScheduleApi.Filters;
 using ScheduleApi.Services.AuthService;
 using ScheduleApi.Services.EmployeeService;
 using ScheduleApi.Services.RequestService;
+using ScheduleApi.Services.ScheduleService;
 using Swashbuckle.AspNetCore.Filters;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +47,7 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
 
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -77,9 +76,8 @@ builder.Services.AddAuthentication(options => {
         //    }
         //};
     });
-Console.WriteLine("CONNECTION_STRING: " + builder.Configuration.GetConnectionString("DefaultConnection"));
 builder.Services.AddDbContext<ScheduleDbContext>(
-    o => o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    o => o.UseSqlServer(builder.Configuration.GetConnectionString("dbConnection")));
 
 var app = builder.Build();
 

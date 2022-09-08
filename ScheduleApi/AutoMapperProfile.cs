@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ScheduleApi.Dtos.EmployeeDtos;
 using ScheduleApi.Dtos.RequestDtos;
+using ScheduleApi.Dtos.ScheduleDtos;
 using ScheduleApi.Models;
 
 namespace ScheduleApi {
@@ -14,6 +15,10 @@ namespace ScheduleApi {
             CreateMap<AddRequestDto, Request>();
             CreateMap<UpdateRequestDto, Request>();
             CreateMap<AddEmployeeRequestDto, Request>();
+
+            CreateMap<Schedule, GetScheduleDto>();
+            CreateMap<AddScheduleDto, Schedule>();
+            CreateMap<UpdateScheduleDto, Schedule>();
         }
     }
 }

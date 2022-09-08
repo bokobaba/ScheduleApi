@@ -7,15 +7,8 @@ namespace ScheduleApi.Utils {
         }
 
         public static string GetUserId(IHttpContextAccessor context) {
-            string result = context.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Console.WriteLine("result: " + result);
-            return result;
+            return context.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
-        public static string GetUserAffiliation(IHttpContextAccessor context) {
-            string result = context.HttpContext.User.FindFirstValue("user_metadata");
-            Console.WriteLine("result: " + result);
-            return result;
-        }
     }
 }
