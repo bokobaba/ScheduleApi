@@ -28,12 +28,12 @@ namespace ScheduleApi.Services.EmployeeService {
         }
 
         public async Task<IEnumerable<GetEmployeeDto>?> GetAllEmployees() {
-            IEnumerable<Employee>? employees = await _context.Employees
+            IEnumerable<Employee> employees = await _context.Employees
                 .Include(e => e.Requests)
                 .Where(e => e.UserId == GetUserId(_contextAccessor))
                 .ToListAsync();
 
-            return employees?.Select(e => _mapper.Map<GetEmployeeDto>(e)).ToList();
+            return employees.Select(e => _mapper.Map<GetEmployeeDto>(e)).ToList();
         }
 
         public async Task<GetEmployeeDto> GetEmployeeById(int id) {

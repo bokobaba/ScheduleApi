@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ScheduleApi.Data;
 using ScheduleApi.Dtos.EmployeeDtos;
-using ScheduleApi.Dtos.RequestDtos;
 using ScheduleApi.Exceptions;
 using ScheduleApi.Services.EmployeeService;
 
@@ -13,16 +11,15 @@ namespace ScheduleApi.Controllers {
     public class EmployeesController : ControllerBase {
         private readonly IEmployeeService _service;
 
-        public EmployeesController(ScheduleDbContext context, IEmployeeService service) {
+        public EmployeesController(IEmployeeService service) {
             _service = service;
         }
 
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(IEnumerable<GetEmployeeDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get() {
-            IEnumerable<GetEmployeeDto>? response = await _service.GetAllEmployees();
-            return response == null ? NoContent() : Ok(response);
+            IEnumerable<GetEmployeeDto> response = await _service.GetAllEmployees();
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
