@@ -23,13 +23,6 @@ namespace ScheduleApi.Controllers {
             return response == null ? NoContent() : Ok(response);
         }
 
-        //[HttpGet("{id}")]
-        //[ProducesResponseType(typeof(GetScheduleDto), StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //public async Task<IActionResult> GetById(int id) {
-        //    return Ok(await _service.GetScheduleById(id));
-        //}
-
         [HttpPost("[action]")]
         [ProducesResponseType(typeof(IEnumerable<GetScheduleDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -68,7 +61,7 @@ namespace ScheduleApi.Controllers {
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Create(AddScheduleDto request) {
             GetScheduleDto response = await _service.AddSchedule(request);
 

@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScheduleApi.Models {
-    [Index(nameof(EmployeeId), IsUnique = true)]
     public class Employee {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -12,7 +11,7 @@ namespace ScheduleApi.Models {
         public int EmployeeId { get; set; }
         [Required]
         public string Name { get; set; }
-        
+        [Required]
         public string UserId { get; set; }
 
         public List<Request>? Requests { get; set; }

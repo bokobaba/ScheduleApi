@@ -22,6 +22,7 @@ namespace ScheduleApi.Services.RequestService {
             await _context.CheckEmployeeUserValid(newRequest.EmployeeId, _contextAccessor);
 
             Request request = _mapper.Map<Request>(newRequest);
+            request.UserId = GetUserId(_contextAccessor);
 
             _context.Requests.Add(request);
             await _context.SaveChangesAsync();
@@ -32,7 +33,7 @@ namespace ScheduleApi.Services.RequestService {
         public async Task DeleteRequest(int id) {
             Request? toDelete = await _context.Requests.FirstOrDefaultAsync(r => r.ID == id);
 
-            if (toDelete == null)
+            if (toDelete == null || toDelete.UserId != GetUserId(_contextAccessor))
                 throw new KeyNotFoundException(IdNotFoundMessage("request", id));
 
             await _context.CheckUserValid("request", id, toDelete.EmployeeId, _contextAccessor);
@@ -43,8 +44,7 @@ namespace ScheduleApi.Services.RequestService {
 
         public async Task<IEnumerable<GetRequestDto>?> GetAllRequests() {
             IEnumerable<Request>? requests = await _context.Requests
-                .Include(r => r.Employee)
-                .Where(r => r.Employee.UserId == GetUserId(_contextAccessor))
+                .Where(r => r.UserId == GetUserId(_contextAccessor))
                 .ToListAsync();
 
             return requests?.Select(r => _mapper.Map<GetRequestDto>(r)).ToList();
@@ -52,30 +52,25 @@ namespace ScheduleApi.Services.RequestService {
 
         public async Task<GetRequestDto> GetReqeustById(int id) {
             Request? request = await _context.Requests.FirstOrDefaultAsync(r => r.ID == id);
-            if (request == null)
+            if (request == null || request.UserId != GetUserId(_contextAccessor))
                 throw new KeyNotFoundException(IdNotFoundMessage("request", id));
-
-            await _context.CheckUserValid("request", id, request.EmployeeId, _contextAccessor);
 
             return _mapper.Map<GetRequestDto>(request);
         }
 
         public async Task<IEnumerable<GetRequestDto>?> GetReqeustsByEmployeeId(int employeeId) {
-            await _context.CheckEmployeeUserValid(employeeId, _contextAccessor);
-
+            string userId = GetUserId(_contextAccessor);
             IEnumerable<Request>? requests = await _context.Requests
-                .Where(r => r.EmployeeId == employeeId)
+                .Where(r => r.UserId == userId && r.EmployeeId == employeeId)
                 .ToListAsync();
 
             return requests?.Select(r => _mapper.Map<GetRequestDto>(r)).ToList();
         }
 
         public async Task<GetRequestDto> UpdateRequest(UpdateRequestDto updateRequest) {
-            await _context.CheckEmployeeUserValid(updateRequest.EmployeeId, _contextAccessor);
-
             Request? request = await _context.Requests.FirstOrDefaultAsync(r => r.ID == updateRequest.ID);
 
-            if (request == null)
+            if (request == null || request.UserId != GetUserId(_contextAccessor))
                 throw new KeyNotFoundException(IdNotFoundMessage("request", updateRequest.ID));
 
             if (request.EmployeeId != updateRequest.EmployeeId)

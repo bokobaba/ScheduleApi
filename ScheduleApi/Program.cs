@@ -1,5 +1,7 @@
+using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.OpenApi.Models;
 using ScheduleApi.Data;
 using ScheduleApi.Extensions;
@@ -9,8 +11,19 @@ using ScheduleApi.Services.EmployeeService;
 using ScheduleApi.Services.RequestService;
 using ScheduleApi.Services.ScheduleService;
 using Swashbuckle.AspNetCore.Filters;
+using System.Reflection.Metadata.Ecma335;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//set up azure app configuration
+string str = builder.Configuration["ConnectionStrings:AppConfig"];
+
+builder.Configuration.AddAzureAppConfiguration(options => {
+    options.Connect(builder.Configuration.GetConnectionString("AppConfig"))
+    .ConfigureKeyVault(kv => {
+        kv.SetCredential(new DefaultAzureCredential());
+    });
+});
 
 // Add services to the container.
 
@@ -52,10 +65,13 @@ builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
+})
     .AddJwtBearer(options => {
-        options.Authority = builder.Configuration["Auth0:Domain"];
-        options.Audience = builder.Configuration["Auth0:Audience"];
+        options.Authority = builder.Configuration["ScheduleApi:Auth0:Domain"];
+        options.Audience = builder.Configuration["ScheduleApi:Auth0:Audience"];
+        //if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT").Equals("Development")) {
+        //    options.RequireHttpsMetadata = false;
+        //}
         //options.TokenValidationParameters = new TokenValidationParameters {
 
         //    ValidateIssuer = true,
@@ -76,15 +92,27 @@ builder.Services.AddAuthentication(options => {
         //    }
         //};
     });
+
+//Configure Database
+
+//string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "";
+//if (env.Equals("LOCAL")) {
+//    builder.Services.AddDbContext<ScheduleDbContext>(
+//    o => o.UseSqlServer(builder.Configuration.GetConnectionString("dbConnection")));
+//} else if (env.Equals("Test")) {
+//    builder.Services.AddDbContext<ScheduleDbContext>(
+//        o => o.UseSqlServer(builder.Configuration["ScheduleApi:TestDbConnectionString"]));
+//} else {
 builder.Services.AddDbContext<ScheduleDbContext>(
-    o => o.UseSqlServer(builder.Configuration.GetConnectionString("dbConnection")));
+        o => o.UseSqlServer(builder.Configuration.GetConnectionString("dbConnection")));
+//}
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment()) {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 //}
 
 app.UseCors(myAllowSpecificOrigins);

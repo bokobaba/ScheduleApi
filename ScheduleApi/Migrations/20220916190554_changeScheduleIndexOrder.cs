@@ -9,35 +9,26 @@ namespace ScheduleApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
-                name: "IX_Schedules_EmployeeId_Day_Week_Year",
+                name: "IX_Schedules_UserId_Week_Year_EmployeeId_Day",
                 table: "Schedules");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Schedules_EmployeeId",
+                name: "IX_Schedules_Week_Year_UserId_EmployeeId_Day",
                 table: "Schedules",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Schedules_Year_Week_Day_EmployeeId",
-                table: "Schedules",
-                columns: new[] { "Year", "Week", "Day", "EmployeeId" },
+                columns: new[] { "Week", "Year", "UserId", "EmployeeId", "Day" },
                 unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
-                name: "IX_Schedules_EmployeeId",
-                table: "Schedules");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Schedules_Year_Week_Day_EmployeeId",
+                name: "IX_Schedules_Week_Year_UserId_EmployeeId_Day",
                 table: "Schedules");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Schedules_EmployeeId_Day_Week_Year",
+                name: "IX_Schedules_UserId_Week_Year_EmployeeId_Day",
                 table: "Schedules",
-                columns: new[] { "EmployeeId", "Day", "Week", "Year" },
+                columns: new[] { "UserId", "Week", "Year", "EmployeeId", "Day" },
                 unique: true);
         }
     }

@@ -12,14 +12,14 @@ using ScheduleApi.Data;
 namespace ScheduleApi.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    [Migration("20220906195853_addIndexSchedule")]
-    partial class addIndexSchedule
+    [Migration("20220916202219_nullableDattimesForRequestModel")]
+    partial class nullableDattimesForRequestModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.8")
+                .HasAnnotation("ProductVersion", "6.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -41,11 +41,11 @@ namespace ScheduleApi.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("EmployeeId")
+                    b.HasIndex("UserId", "EmployeeId")
                         .IsUnique();
 
                     b.ToTable("Employees");
@@ -62,15 +62,21 @@ namespace ScheduleApi.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("End")
+                    b.Property<DateTime?>("End")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("Start")
+                    b.Property<DateTime?>("Start")
+                        .IsRequired()
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("UserId", "EmployeeId");
 
                     b.ToTable("Requests");
                 });
@@ -95,6 +101,10 @@ namespace ScheduleApi.Migrations
                     b.Property<DateTime>("Start")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("Week")
                         .HasColumnType("int");
 
@@ -103,7 +113,9 @@ namespace ScheduleApi.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("EmployeeId", "Day", "Week", "Year")
+                    b.HasIndex("UserId", "EmployeeId");
+
+                    b.HasIndex("UserId", "Week", "Year", "EmployeeId", "Day")
                         .IsUnique();
 
                     b.ToTable("Schedules");
@@ -183,8 +195,8 @@ namespace ScheduleApi.Migrations
                 {
                     b.HasOne("ScheduleApi.Models.Employee", "Employee")
                         .WithMany("Requests")
-                        .HasForeignKey("EmployeeId")
-                        .HasPrincipalKey("EmployeeId")
+                        .HasForeignKey("UserId", "EmployeeId")
+                        .HasPrincipalKey("UserId", "EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -195,8 +207,8 @@ namespace ScheduleApi.Migrations
                 {
                     b.HasOne("ScheduleApi.Models.Employee", "Employee")
                         .WithMany("Schedules")
-                        .HasForeignKey("EmployeeId")
-                        .HasPrincipalKey("EmployeeId")
+                        .HasForeignKey("UserId", "EmployeeId")
+                        .HasPrincipalKey("UserId", "EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

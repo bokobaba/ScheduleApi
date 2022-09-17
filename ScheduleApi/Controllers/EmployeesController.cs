@@ -19,6 +19,7 @@ namespace ScheduleApi.Controllers {
         [ProducesResponseType(typeof(IEnumerable<GetEmployeeDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get() {
             IEnumerable<GetEmployeeDto> response = await _service.GetAllEmployees();
+
             return Ok(response);
         }
 
@@ -26,7 +27,9 @@ namespace ScheduleApi.Controllers {
         [ProducesResponseType(typeof(GetEmployeeDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id) {
-            return Ok(await _service.GetEmployeeById(id));
+            GetEmployeeDto response = await _service.GetEmployeeById(id);
+
+            return Ok(response);
         }
 
         [HttpPost]

@@ -20,21 +20,11 @@ namespace ScheduleApiTest.Systems.Controllers {
             _factory = factory;
             _client = _factory.CreateClient();
 
-            var client = new RestClient("https://dev-0yfu4fcd.us.auth0.com/oauth/token");
-            var request = new RestRequest();
-            request.AddHeader("content-type", "application/json");
-            request.AddParameter("application/json",
-                "{\"client_id\":\"a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH\",\"client_secret\":\"BV4EIi5rqWkUcb8dFwO720dRMH2VFDb5ttL4cP18yvJIJ24zUFqwDE0ZfoGo_Id2\",\"audience\":\"https://scheduleapi20220831111508.azurewebsites.net/api\",\"grant_type\":\"client_credentials\"}", ParameterType.RequestBody);
-            RestResponse response = client.Post(request);
-            var str = response.Content;
-            TokenResponse json = JsonConvert.DeserializeObject<TokenResponse>(str);
-
-            _client.DefaultRequestHeaders.Add("authorization", "bearer " + json.Access_token);
-            //_client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        }
+            Utilities.SetClientToken(_client);
+}
 
         [Fact]
-        public async Task Employees_Get() {
+        public async Task Employees_Get_ReturnSuccess() {
             // Arrange
             string url = "/api/Employees";
 
@@ -59,7 +49,7 @@ namespace ScheduleApiTest.Systems.Controllers {
 
         [Theory]
         [InlineData(6439174)]
-        [InlineData(1234566)]
+        [InlineData(1234567)]
         public async Task Employees_GetById_ReturnSuccess(int id) {
             string url = "/api/Employees/" + id;
             //Act
@@ -70,7 +60,7 @@ namespace ScheduleApiTest.Systems.Controllers {
 
             string str = await response.Content.ReadAsStringAsync();
             GetEmployeeDto employee = JsonConvert.DeserializeObject<GetEmployeeDto>(str);
-            Employee expected = Utilities.seedingEmployees.FirstOrDefault(e => e.EmployeeId == id);
+            Employee? expected = Utilities.seedingEmployees.FirstOrDefault(e => e.EmployeeId == id);
 
             employee.Should().NotBeNull();
             employee.Should().Match<GetEmployeeDto>(e =>
@@ -100,9 +90,14 @@ namespace ScheduleApiTest.Systems.Controllers {
                 EmployeeId = 9876543,
                 Name = "Jenny",
             };
+            AddEmployeeDto request2 = new AddEmployeeDto() {
+                EmployeeId = 2222222,
+                Name = "Jeff"
+            };
 
             //Act
-            var response = await _client.PostAsJsonAsync(url, request);
+            var response = await _client.PostAsJsonAsync(url, request);  //normal create employee
+            var response2 = await _client.PostAsJsonAsync(url, request2); //id already exists under different user
 
             //Assert
             response.EnsureSuccessStatusCode();
@@ -114,6 +109,16 @@ namespace ScheduleApiTest.Systems.Controllers {
             employee.Should().Match<GetEmployeeDto>(e =>
                 e.EmployeeId == request.EmployeeId &&
                 e.Name == request.Name);
+
+            response2.EnsureSuccessStatusCode();
+
+            string str2 = await response2.Content.ReadAsStringAsync();
+            GetEmployeeDto employee2 = JsonConvert.DeserializeObject<GetEmployeeDto>(str2);
+
+            employee2.Should().NotBeNull();
+            employee2.Should().Match<GetEmployeeDto>(e =>
+                e.EmployeeId == request2.EmployeeId &&
+                e.Name == request2.Name);
         }
 
         [Fact]
@@ -121,7 +126,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             //Arrange
             string url = "/api/Employees";
             AddEmployeeDto request1 = new AddEmployeeDto() {
-                EmployeeId = 9876543,
+                EmployeeId = 6439174,
                 Name = "Dupe",
             };
             AddEmployeeDto request2 = new AddEmployeeDto() {
@@ -141,10 +146,10 @@ namespace ScheduleApiTest.Systems.Controllers {
         [Fact]
         public async Task Employees_Update_ReturnSuccess() {
             //Arrange
-            string url = "/api/Employees/6439174";
+            string url = "/api/Employees/1234566";
             var request = new UpdateEmployeeDto() {
-                EmployeeId = 6439174,
-                Name = "ParkerTest"
+                EmployeeId = 1234566,
+                Name = "TestUpdate"
             };
 
             //Act
@@ -178,7 +183,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             };
             var request3 = new UpdateEmployeeDto() {
                 EmployeeId = 7654321,
-                Name = "John"
+                Name = "Invalid User"
             };
 
                 //Act

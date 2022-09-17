@@ -1,4 +1,6 @@
-﻿namespace ScheduleApi.Dtos.RequestDtos {
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ScheduleApi.Dtos.RequestDtos {
     public class GetRequestDto {
         public int ID { get; set; }
         public DateTime Start { get; set; }

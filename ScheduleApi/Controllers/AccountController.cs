@@ -9,14 +9,14 @@ namespace ScheduleApi.Controllers {
     public class AccountController : ControllerBase {
         private readonly IAuthService _service;
 
-        public AccountController(IAuthService service) {
+        internal AccountController(IAuthService service) {
             _service = service;
         }
 
         [HttpPost("[action]")]
         [ProducesResponseType(typeof(RegisterResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<RegisterResponseDto>> Register(UserRegisterDto request) {
+        internal async Task<ActionResult<RegisterResponseDto>> Register(UserRegisterDto request) {
             RegisterResponseDto response = await _service.Register(request);
 
             return Ok(response);
@@ -26,7 +26,7 @@ namespace ScheduleApi.Controllers {
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<AuthResponseDto>> Login(UserLoginDto request) {
+        internal async Task<ActionResult<AuthResponseDto>> Login(UserLoginDto request) {
             AuthResponseDto response = await _service.Login(request);
 
             return Ok(response);
@@ -35,7 +35,7 @@ namespace ScheduleApi.Controllers {
         [HttpPost("[action]")]
         [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<AuthResponseDto>> RefreshToken([FromBody] RefreshTokenRequest request) {
+        internal async Task<ActionResult<AuthResponseDto>> RefreshToken([FromBody] RefreshTokenRequest request) {
             AuthResponseDto response = await _service.RefreshToken(request);
 
             return Ok(response);

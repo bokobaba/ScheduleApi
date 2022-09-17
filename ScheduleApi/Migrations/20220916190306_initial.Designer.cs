@@ -12,14 +12,14 @@ using ScheduleApi.Data;
 namespace ScheduleApi.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    [Migration("20220904162639_initial")]
+    [Migration("20220916190306_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.8")
+                .HasAnnotation("ProductVersion", "6.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -32,10 +32,6 @@ namespace ScheduleApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
-                    b.Property<string>("Affiliation")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
@@ -45,11 +41,11 @@ namespace ScheduleApi.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("EmployeeId")
+                    b.HasIndex("UserId", "EmployeeId")
                         .IsUnique();
 
                     b.ToTable("Employees");
@@ -72,9 +68,13 @@ namespace ScheduleApi.Migrations
                     b.Property<DateTime>("Start")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("ID");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("UserId", "EmployeeId");
 
                     b.ToTable("Requests");
                 });
@@ -99,6 +99,10 @@ namespace ScheduleApi.Migrations
                     b.Property<DateTime>("Start")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("Week")
                         .HasColumnType("int");
 
@@ -106,6 +110,11 @@ namespace ScheduleApi.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("UserId", "EmployeeId");
+
+                    b.HasIndex("UserId", "Week", "Year", "EmployeeId", "Day")
+                        .IsUnique();
 
                     b.ToTable("Schedules");
                 });
@@ -184,8 +193,20 @@ namespace ScheduleApi.Migrations
                 {
                     b.HasOne("ScheduleApi.Models.Employee", "Employee")
                         .WithMany("Requests")
-                        .HasForeignKey("EmployeeId")
-                        .HasPrincipalKey("EmployeeId")
+                        .HasForeignKey("UserId", "EmployeeId")
+                        .HasPrincipalKey("UserId", "EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("ScheduleApi.Models.Schedule", b =>
+                {
+                    b.HasOne("ScheduleApi.Models.Employee", "Employee")
+                        .WithMany("Schedules")
+                        .HasForeignKey("UserId", "EmployeeId")
+                        .HasPrincipalKey("UserId", "EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -206,6 +227,8 @@ namespace ScheduleApi.Migrations
             modelBuilder.Entity("ScheduleApi.Models.Employee", b =>
                 {
                     b.Navigation("Requests");
+
+                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("ScheduleApi.Models.User", b =>

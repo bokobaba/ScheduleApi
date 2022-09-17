@@ -37,23 +37,27 @@ namespace ScheduleApi.Services.EmployeeService {
         }
 
         public async Task<GetEmployeeDto> GetEmployeeById(int id) {
+            string userId = GetUserId(_contextAccessor);
             Employee? employee = await _context.Employees
                 .Include(_e => _e.Requests)
-                .FirstOrDefaultAsync(e => e.EmployeeId == id);
+                .FirstOrDefaultAsync(e => e.UserId == userId && e.EmployeeId == id);
 
-            if (employee == null || employee.UserId != GetUserId(_contextAccessor)) {
+            if (employee == null) {
                 throw new KeyNotFoundException(IdNotFoundMessage("employee", id));
             }
+
+            string str = employee.UserId;
 
             return _mapper.Map<GetEmployeeDto>(employee);
         }
 
         public async Task<GetEmployeeDto> UpdateEmployee(UpdateEmployeeDto updateEmployee) {
+            string userId = GetUserId(_contextAccessor);
             Employee? employee = await _context.Employees
                 .Include(e => e.Requests)
-                .FirstOrDefaultAsync(e => e.EmployeeId == updateEmployee.EmployeeId);
+                .FirstOrDefaultAsync(e => e.UserId == userId && e.EmployeeId == updateEmployee.EmployeeId);
 
-            if (employee == null || employee.UserId != GetUserId(_contextAccessor)) {
+            if (employee == null) {
                 throw new KeyNotFoundException(IdNotFoundMessage("employee", updateEmployee.EmployeeId));
             }
 
@@ -69,9 +73,11 @@ namespace ScheduleApi.Services.EmployeeService {
         }
 
         public async Task DeleteEmployee(int id) {
-            Employee? toDelete = await _context.Employees.FirstOrDefaultAsync(e => e.EmployeeId == id);
+            string userId = GetUserId(_contextAccessor);
+            Employee? toDelete = await _context.Employees
+                .FirstOrDefaultAsync(e => e.UserId == userId && e.EmployeeId == id);
 
-            if (toDelete == null || toDelete.UserId != GetUserId(_contextAccessor)) {
+            if (toDelete == null) {
                 throw new KeyNotFoundException(IdNotFoundMessage("employee", id));
             }
 

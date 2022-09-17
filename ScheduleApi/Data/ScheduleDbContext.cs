@@ -14,21 +14,24 @@ namespace ScheduleApi.Data {
 
         protected override void OnModelCreating(ModelBuilder builder) {
             builder.Entity<Employee>()
+                .HasIndex(e => new { e.UserId, e.EmployeeId }).IsUnique();
+
+            builder.Entity<Employee>()
                 .HasMany(e => e.Requests)
                 .WithOne(r => r.Employee)
-                .HasPrincipalKey(e => e.EmployeeId)
-                .HasForeignKey(r => r.EmployeeId)
+                .HasPrincipalKey(e => new { e.UserId, e.EmployeeId })
+                .HasForeignKey(r => new { r.UserId, r.EmployeeId })
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Employee>()
                 .HasMany(e => e.Schedules)
                 .WithOne(s => s.Employee)
-                .HasPrincipalKey(e => e.EmployeeId)
-                .HasForeignKey(s => s.EmployeeId)
+                .HasPrincipalKey(e => new { e.UserId, e.EmployeeId })
+                .HasForeignKey(s => new { s.UserId, s.EmployeeId })
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Schedule>()
-                .HasIndex(s => new { s.Week, s.Year, s.EmployeeId, s.Day }).IsUnique();
+                .HasIndex(s => new { s.UserId, s.Week, s.Year, s.EmployeeId, s.Day }).IsUnique();
         }
 
         public async Task<Employee> CheckEmployeeValid(int employeeId) {

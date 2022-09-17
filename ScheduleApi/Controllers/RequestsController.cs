@@ -63,7 +63,7 @@ namespace ScheduleApi.Controllers {
         public async Task<IActionResult> Update(int id, UpdateRequestDto request) {
             if (id != request.ID)
                 throw new AppException(
-                    string.Format("id = {0} does not match that of the employee to update id = {1}",
+                    string.Format("id = {0} does not match that of the request to update id = {1}",
                     id, request.ID));
 
             GetRequestDto response = await _service.UpdateRequest(request);

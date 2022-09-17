@@ -17,31 +17,12 @@ namespace ScheduleApi.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EmployeeId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Affiliation = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Employees", x => x.ID);
-                    table.UniqueConstraint("AK_Employees_EmployeeId", x => x.EmployeeId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Schedules",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    EmployeeId = table.Column<int>(type: "int", nullable: false),
-                    Year = table.Column<int>(type: "int", nullable: false),
-                    Week = table.Column<int>(type: "int", nullable: false),
-                    Day = table.Column<int>(type: "int", nullable: false),
-                    Start = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    End = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Schedules", x => x.ID);
+                    table.UniqueConstraint("AK_Employees_UserId_EmployeeId", x => new { x.UserId, x.EmployeeId });
                 });
 
             migrationBuilder.CreateTable(
@@ -68,16 +49,42 @@ namespace ScheduleApi.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Start = table.Column<DateTime>(type: "datetime2", nullable: false),
                     End = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Requests", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Requests_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
+                        name: "FK_Requests_Employees_UserId_EmployeeId",
+                        columns: x => new { x.UserId, x.EmployeeId },
                         principalTable: "Employees",
-                        principalColumn: "EmployeeId",
+                        principalColumns: new[] { "UserId", "EmployeeId" },
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Schedules",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    Week = table.Column<int>(type: "int", nullable: false),
+                    Day = table.Column<int>(type: "int", nullable: false),
+                    Start = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    End = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Schedules", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Schedules_Employees_UserId_EmployeeId",
+                        columns: x => new { x.UserId, x.EmployeeId },
+                        principalTable: "Employees",
+                        principalColumns: new[] { "UserId", "EmployeeId" },
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -107,9 +114,9 @@ namespace ScheduleApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Employees_EmployeeId",
+                name: "IX_Employees_UserId_EmployeeId",
                 table: "Employees",
-                column: "EmployeeId",
+                columns: new[] { "UserId", "EmployeeId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -118,9 +125,20 @@ namespace ScheduleApi.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Requests_EmployeeId",
+                name: "IX_Requests_UserId_EmployeeId",
                 table: "Requests",
-                column: "EmployeeId");
+                columns: new[] { "UserId", "EmployeeId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schedules_UserId_EmployeeId",
+                table: "Schedules",
+                columns: new[] { "UserId", "EmployeeId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schedules_UserId_Week_Year_EmployeeId_Day",
+                table: "Schedules",
+                columns: new[] { "UserId", "Week", "Year", "EmployeeId", "Day" },
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

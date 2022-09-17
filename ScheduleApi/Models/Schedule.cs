@@ -13,10 +13,11 @@ namespace ScheduleApi.Models {
         [Required]
         public int Day { get; set; }
         [Required]
-        public DateTime Start { get; set; }
+        public DateTime? Start { get; set; }
         [Required]
-        public DateTime End { get; set; }
+        public DateTime? End { get; set; }
 
+        public string UserId { get; set; }
         public int EmployeeId { get; set; }
         public Employee Employee { get; set; }
 
