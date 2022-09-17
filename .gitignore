@@ -363,4 +363,3 @@ MigrationBackup/
 FodyWeavers.xsd
 
 /ScheduleApi/appsettings.Local.json
-/ScheduleApi/appsettings.Development.json
