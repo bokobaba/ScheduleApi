@@ -16,14 +16,19 @@ namespace ScheduleApiTest.Fixtures {
 
         protected override void ConfigureWebHost(IWebHostBuilder builder) {
             builder.ConfigureServices(services => {
-                //var descriptor = services.SingleOrDefault(
-                //    d => d.ServiceType == typeof(DbContextOptions<ScheduleDbContext>));
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<ScheduleDbContext>));
 
-                //services.Remove(descriptor);
+                services.Remove(descriptor);
 
-                //services.AddDbContext<ScheduleDbContext>(options => {
-                //    options.UseSqlServer("server=(localdb)\\MSSQLLocalDB;database=ScheduleApiDb;");
-                //});
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables()
+                .Build();
+
+                services.AddDbContext<ScheduleDbContext>(options => {
+                    options.UseSqlServer(configuration.GetConnectionString("dbTestConnection"));
+                });
 
                 //services.AddDbContext<ScheduleDbContext>(options => {
                 //    options.UseInMemoryDatabase("InMemoryDbForTesting");

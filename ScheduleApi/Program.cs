@@ -16,12 +16,13 @@ using System.Reflection.Metadata.Ecma335;
 var builder = WebApplication.CreateBuilder(args);
 
 //set up azure app configuration
-string str = builder.Configuration["ConnectionStrings:AppConfig"];
-
 builder.Configuration.AddAzureAppConfiguration(options => {
     options.Connect(builder.Configuration.GetConnectionString("AppConfig"))
     .ConfigureKeyVault(kv => {
         kv.SetCredential(new DefaultAzureCredential());
+    }).ConfigureRefresh(refresh => {
+        refresh.Register("refreshAll", true);
+        refresh.SetCacheExpiration(TimeSpan.FromSeconds(5));
     });
 });
 
