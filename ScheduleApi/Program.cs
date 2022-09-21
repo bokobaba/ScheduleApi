@@ -42,6 +42,7 @@ builder.Services.AddSwaggerGen(options => {
 
     options.OperationFilter<SecurityRequirementsOperationFilter>();
     options.SchemaFilter<SwaggerSchemaFilter>();
+    options.CustomOperationIds(e => $"{e.ActionDescriptor.RouteValues["controller"]}_{e.ActionDescriptor.RouteValues["action"]}");
 });
 
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
