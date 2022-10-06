@@ -36,15 +36,16 @@ namespace ScheduleApi.Services.RequestService {
             if (toDelete == null || toDelete.UserId != GetUserId(_contextAccessor))
                 throw new KeyNotFoundException(IdNotFoundMessage("request", id));
 
-            await _context.CheckUserValid("request", id, toDelete.EmployeeId, _contextAccessor);
+            //await _context.CheckUserValid("request", id, toDelete.EmployeeId, _contextAccessor);
 
             _context.Requests.Remove(toDelete);
             await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<GetRequestDto>?> GetAllRequests() {
+            string userId = GetUserId(_contextAccessor);
             IEnumerable<Request>? requests = await _context.Requests
-                .Where(r => r.UserId == GetUserId(_contextAccessor))
+                .Where(r => r.UserId == userId)
                 .ToListAsync();
 
             return requests?.Select(r => _mapper.Map<GetRequestDto>(r)).ToList();

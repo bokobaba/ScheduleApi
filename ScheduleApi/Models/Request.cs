@@ -10,6 +10,8 @@ namespace ScheduleApi.Models {
         public DateTime? Start { get; set; }
         [Required]
         public DateTime? End { get; set; }
+        [Required]
+        public string Description { get; set; }
 
         public string UserId { get; set; }
         public int EmployeeId { get; set; }

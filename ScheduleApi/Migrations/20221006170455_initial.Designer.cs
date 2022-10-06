@@ -12,8 +12,8 @@ using ScheduleApi.Data;
 namespace ScheduleApi.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    [Migration("20220916202219_nullableDattimesForRequestModel")]
-    partial class nullableDattimesForRequestModel
+    [Migration("20221006170455_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -59,6 +59,10 @@ namespace ScheduleApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
@@ -95,10 +99,12 @@ namespace ScheduleApi.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("End")
+                    b.Property<DateTime?>("End")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("Start")
+                    b.Property<DateTime?>("Start")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")

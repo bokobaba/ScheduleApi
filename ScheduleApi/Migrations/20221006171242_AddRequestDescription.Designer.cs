@@ -12,8 +12,8 @@ using ScheduleApi.Data;
 namespace ScheduleApi.Migrations
 {
     [DbContext(typeof(ScheduleDbContext))]
-    [Migration("20220916190554_changeScheduleIndexOrder")]
-    partial class changeScheduleIndexOrder
+    [Migration("20221006171242_AddRequestDescription")]
+    partial class AddRequestDescription
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -59,13 +59,19 @@ namespace ScheduleApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("End")
+                    b.Property<DateTime?>("End")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("Start")
+                    b.Property<DateTime?>("Start")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
@@ -93,10 +99,12 @@ namespace ScheduleApi.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("End")
+                    b.Property<DateTime?>("End")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("Start")
+                    b.Property<DateTime?>("Start")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
@@ -113,7 +121,7 @@ namespace ScheduleApi.Migrations
 
                     b.HasIndex("UserId", "EmployeeId");
 
-                    b.HasIndex("Week", "Year", "UserId", "EmployeeId", "Day")
+                    b.HasIndex("UserId", "Week", "Year", "EmployeeId", "Day")
                         .IsUnique();
 
                     b.ToTable("Schedules");

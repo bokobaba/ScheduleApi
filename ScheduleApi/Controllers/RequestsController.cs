@@ -19,7 +19,7 @@ namespace ScheduleApi.Controllers {
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(IEnumerable<GetEmployeeDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<GetRequestDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get() {
             IEnumerable<GetRequestDto>? response = await _service.GetAllRequests();
 

@@ -49,7 +49,9 @@ namespace ScheduleApi.Data {
         }
 
         public async Task CheckEmployeeUserValid(int employeeId, IHttpContextAccessor ctx) {
-            Employee employee = await CheckEmployeeValid(employeeId);
+            Employee? employee = await Employees.FirstOrDefaultAsync(e =>
+                e.EmployeeId == employeeId &&
+                e.UserId == GetUserId(ctx));
             if (employee.UserId != GetUserId(ctx)) {
                 throw new KeyNotFoundException(IdNotFoundMessage("employee", employeeId));
             }

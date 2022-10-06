@@ -8,6 +8,5 @@ namespace ScheduleApi.Dtos.EmployeeDtos {
         public int EmployeeId { get; set; }
         [Required]
         public string Name { get; set; }
-        public List<AddEmployeeRequestDto>? Requests { get; set; }
     }
 }

@@ -63,10 +63,6 @@ namespace ScheduleApi.Services.EmployeeService {
 
             employee.Name = updateEmployee.Name;
 
-            if (employee.Requests != null)
-                _context.Requests.RemoveRange(employee.Requests);
-            employee.Requests = updateEmployee.Requests?.Select(r => _mapper.Map<Request>(r)).ToList();
-
             await _context.SaveChangesAsync();
 
             return _mapper.Map<GetEmployeeDto>(employee);

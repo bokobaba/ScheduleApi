@@ -8,6 +8,8 @@ namespace ScheduleApi.Dtos.RequestDtos {
         [Required]
         public DateTime? End { get; set; }
         [Required]
+        public string Description { get; set; }
+        [Required]
         public int EmployeeId { get; set; }
     }
 }

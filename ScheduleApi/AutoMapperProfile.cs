@@ -14,7 +14,6 @@ namespace ScheduleApi {
             CreateMap<Request, GetRequestDto>();
             CreateMap<AddRequestDto, Request>();
             CreateMap<UpdateRequestDto, Request>();
-            CreateMap<AddEmployeeRequestDto, Request>();
 
             CreateMap<Schedule, GetScheduleDto>();
             CreateMap<AddScheduleDto, Schedule>();
