@@ -12,10 +12,8 @@ namespace ScheduleApi.Models {
         public int Week { get; set; }
         [Required]
         public int Day { get; set; }
-        [Required]
-        public DateTime? Start { get; set; }
-        [Required]
-        public DateTime? End { get; set; }
+        public string? Start { get; set; }
+        public string? End { get; set; }
 
         public string UserId { get; set; }
         public int EmployeeId { get; set; }
@@ -30,8 +28,8 @@ namespace ScheduleApi.Models {
             Day = day;
             Year = year;
             Week = week;
-            Start = DateTime.Now;
-            End = DateTime.Now;
+            Start = "";
+            End = "";
         }
     }
 }

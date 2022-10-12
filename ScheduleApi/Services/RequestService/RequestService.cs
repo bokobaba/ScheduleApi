@@ -82,6 +82,7 @@ namespace ScheduleApi.Services.RequestService {
 
             request.Start = updateRequest.Start;
             request.End = updateRequest.End;
+            request.Description = updateRequest.Description;
 
             await _context.SaveChangesAsync();
 

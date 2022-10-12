@@ -50,11 +50,11 @@ namespace ScheduleApi.Controllers {
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update(int id, UpdateEmployeeDto employee) {
-            if (id != employee.EmployeeId) {
-                throw new AppException(
-                    string.Format("id = {0} does not match that of the employee to update id = {1}",
-                    id, employee.EmployeeId));
-            }
+            //if (id != employee.EmployeeId) {
+            //    throw new AppException(
+            //        string.Format("id = {0} does not match that of the employee to update id = {1}",
+            //        id, employee.EmployeeId));
+            //}
 
             await _service.UpdateEmployee(employee);
 

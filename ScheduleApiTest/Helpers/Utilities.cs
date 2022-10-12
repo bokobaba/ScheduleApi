@@ -110,8 +110,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 3,
                 Year = 2022,
                 Day = 1,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() {
                 EmployeeId = 6439174,
@@ -119,8 +119,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 3,
                 Year = 2022,
                 Day = 2,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() {
                 EmployeeId = 6439174,
@@ -128,8 +128,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 2,
                 Year = 2022,
                 Day = 1,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString(),
             },
             new Schedule() {
                 EmployeeId = 1234567,
@@ -137,8 +137,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 2,
                 Year = 2022,
                 Day = 1,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() {
                 EmployeeId = 1234567,
@@ -146,8 +146,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 2,
                 Year = 2022,
                 Day = 4,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() { //invalid User
                 EmployeeId = 7654321,
@@ -155,8 +155,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 2,
                 Year = 2022,
                 Day = 4,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() { //invalid User2
                 EmployeeId = 2222222,
@@ -164,8 +164,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 2,
                 Year = 2022,
                 Day = 4,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() { //Test Update
                 EmployeeId = 1234566,
@@ -173,8 +173,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 2,
                 Year = 2022,
                 Day = 4,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() { //Test Delete
                 EmployeeId = 1111111,
@@ -182,8 +182,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 1,
                 Year = 2022,
                 Day = 1,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString(),
             },
             new Schedule() { //Test Delete Cascade
                 EmployeeId = 1111111,
@@ -191,8 +191,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 1,
                 Year = 2022,
                 Day = 2,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() { //Test Delete Cascade
                 EmployeeId = 1111111,
@@ -200,8 +200,8 @@ namespace ScheduleApiTest.Helpers {
                 Week = 1,
                 Year = 2022,
                 Day = 3,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
 
         };

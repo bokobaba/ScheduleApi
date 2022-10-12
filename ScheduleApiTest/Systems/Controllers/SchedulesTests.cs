@@ -118,8 +118,8 @@ namespace ScheduleApiTest.Systems.Controllers {
                 Year = 2023,
                 Week = 20,
                 Day = 1,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddHours(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddHours(1).ToShortTimeString()
             };
 
             //Act
@@ -150,23 +150,23 @@ namespace ScheduleApiTest.Systems.Controllers {
                 Year = 2023,
                 Week = 20,
                 Day = 1,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddHours(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddHours(1).ToShortTimeString()
             };
             AddScheduleDto request2 = new AddScheduleDto() {
                 EmployeeId = 6439174,
                 Year = 2023,
                 Day = 1,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddHours(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddHours(1).ToShortTimeString()
             };
             AddScheduleDto request3 = new AddScheduleDto() {
                 EmployeeId = 7654321,
                 Year = 2023,
                 Week = 20,
                 Day = 1,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddHours(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddHours(1).ToShortTimeString()
             };
 
             //Act
@@ -187,8 +187,8 @@ namespace ScheduleApiTest.Systems.Controllers {
             string url = "/api/Schedules";
             var request = new UpdateScheduleDto() {
                 EmployeeId = 1234566,
-                Start = DateTime.UtcNow.AddHours(3),
-                End = DateTime.UtcNow.AddHours(5),
+                Start = DateTime.UtcNow.AddHours(3).ToShortTimeString(),
+                End = DateTime.UtcNow.AddHours(5).ToShortTimeString(),
                 Year = 2022,
                 Week = 2,
                 Day = 4,
@@ -219,8 +219,8 @@ namespace ScheduleApiTest.Systems.Controllers {
             string url = "/api/Schedules";
             var request2 = new UpdateScheduleDto() {
                 EmployeeId = 7777777,
-                Start = DateTime.UtcNow.AddHours(3),
-                End = DateTime.UtcNow.AddHours(5),
+                Start = DateTime.UtcNow.AddHours(3).ToShortTimeString(),
+                End = DateTime.UtcNow.AddHours(5).ToShortTimeString(),
                 Year = 2022,
                 Week = 2,
                 Day = 4,
@@ -230,21 +230,21 @@ namespace ScheduleApiTest.Systems.Controllers {
                 Week = 2,
                 Year = 2022,
                 Day = 4,
-                Start = DateTime.UtcNow,
-                End = DateTime.UtcNow.AddDays(1)
+                Start = DateTime.UtcNow.ToShortTimeString(),
+                End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             };
             var request4 = new UpdateScheduleDto() {
                 EmployeeId = 1234567,
-                Start = DateTime.UtcNow.AddHours(3),
-                End = DateTime.UtcNow.AddHours(5),
+                Start = DateTime.UtcNow.AddHours(3).ToShortTimeString(),
+                End = DateTime.UtcNow.AddHours(5).ToShortTimeString(),
                 Year = 2022,
                 Week = 2,
                 Day = 5,
             };
             var request5 = new UpdateScheduleDto() {
                 EmployeeId = 6439174,
-                Start = DateTime.UtcNow.AddHours(3),
-                End = DateTime.UtcNow.AddHours(5),
+                Start = DateTime.UtcNow.AddHours(3).ToShortTimeString(),
+                End = DateTime.UtcNow.AddHours(5).ToShortTimeString(),
                 Year = 2022,
                 Week = 2,
             };

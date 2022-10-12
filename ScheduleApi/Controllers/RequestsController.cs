@@ -53,7 +53,7 @@ namespace ScheduleApi.Controllers {
                 new {
                     id = response.ID,
                 },
-                request);
+                response);
         }
 
         [HttpPut("{id}")]
