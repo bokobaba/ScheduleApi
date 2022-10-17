@@ -1,20 +1,14 @@
 ﻿using FluentAssertions;
 using Newtonsoft.Json;
-using RestSharp;
-using ScheduleApi.Dtos.EmployeeDtos;
 using ScheduleApi.Dtos.ScheduleDtos;
 using ScheduleApi.Models;
 using ScheduleApiTest.Fixtures;
 using ScheduleApiTest.Helpers;
-using ScheduleApiTest.Models;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Security.Policy;
-using System.Text;
 
 namespace ScheduleApiTest.Systems.Controllers {
+    [Collection("ScheduleApi")]
     public class SchedulesTests : IClassFixture<CustomWebApplicationFactory<Program>> {
         private readonly CustomWebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
@@ -146,7 +140,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             //Arrange
             string url = "/api/Schedules";
             AddScheduleDto request1 = new AddScheduleDto() {
-                EmployeeId = 5555555,
+                EmployeeId = 1839250,
                 Year = 2023,
                 Week = 20,
                 Day = 1,
@@ -266,17 +260,17 @@ namespace ScheduleApiTest.Systems.Controllers {
         public async Task Schedules_Delete_ReturnSuccess() {
             //Arrange
             string url1 = "/api/Schedules";
-            string url2 = "/api/Employees/1111111";
+            string url2 = "/api/Employees/4444444";
             string url3 = "/api/Schedules/EmployeeDaySchedule";
 
             var request1 = new EmployeeDayScheduleDto() {
-                EmployeeId = 1111111,
+                EmployeeId = 4444444,
                 Week = 1,
                 Year = 2022,
                 Day = 1,
             };
             var request3 = new EmployeeDayScheduleDto() {
-                EmployeeId = 1111111,
+                EmployeeId = 4444444,
                 Week = 1,
                 Year = 2022,
                 Day = 3,

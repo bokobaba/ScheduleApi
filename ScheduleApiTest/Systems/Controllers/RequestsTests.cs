@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace ScheduleApiTest.Systems.Controllers {
+    [Collection("ScheduleApi")]
     public class RequestsTests : IClassFixture<CustomWebApplicationFactory<Program>> {
         private readonly CustomWebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
@@ -90,6 +91,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             AddRequestDto request = new AddRequestDto() {
                 EmployeeId = 6439174,
                 Start = DateTime.UtcNow,
+                Description = "None",
                 End = DateTime.UtcNow.AddHours(1)
             };
 
@@ -114,16 +116,19 @@ namespace ScheduleApiTest.Systems.Controllers {
             //Arrange
             string url = "/api/Requests";
             AddRequestDto request1 = new AddRequestDto() {
-                EmployeeId = 5555555,
+                EmployeeId = 5843982,
+                Description = "None",
                 Start = DateTime.UtcNow,
                 End = DateTime.UtcNow.AddHours(1)
             };
             AddRequestDto request2 = new AddRequestDto() {
                 EmployeeId = 6439174,
+                Description = "None",
                 Start = DateTime.UtcNow,
             };
             AddRequestDto request3 = new AddRequestDto() {
                 EmployeeId = 7654321,
+                Description = "None",
                 Start = DateTime.UtcNow,
                 End= DateTime.UtcNow.AddHours(2)
             };
@@ -147,6 +152,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             var request = new UpdateRequestDto() {
                 ID = 7,
                 EmployeeId = 1234566,
+                Description = "None",
                 Start = DateTime.UtcNow.AddHours(3),
                 End = DateTime.UtcNow.AddHours(5),
             };
@@ -177,36 +183,41 @@ namespace ScheduleApiTest.Systems.Controllers {
             var request1 = new UpdateRequestDto() {
                 ID = 1,
                 EmployeeId = 6439174,
+                Description = "None",
                 Start = DateTime.UtcNow.AddHours(6),
                 End = DateTime.UtcNow.AddHours(7)
             };
             var request2 = new UpdateRequestDto() {
-                ID = 10,
+                ID = 20,
                 EmployeeId = 6439174,
+                Description = "None",
                 Start = DateTime.UtcNow.AddHours(6),
                 End = DateTime.UtcNow.AddHours(7)
             };
             var request3 = new UpdateRequestDto() {
                 ID = 5,
                 EmployeeId = 7654321,
+                Description = "None",
                 Start = DateTime.UtcNow.AddHours(6),
                 End = DateTime.UtcNow.AddHours(7)
             };
             var request4 = new UpdateRequestDto() {
                 ID = 1,
                 EmployeeId = 1234567,
+                Description = "None",
                 Start = DateTime.UtcNow.AddHours(6),
                 End = DateTime.UtcNow.AddHours(7)
             };
             var request5 = new UpdateRequestDto() {
                 ID = 1,
                 EmployeeId = 6439174,
+                Description = "None",
                 End = DateTime.UtcNow.AddHours(7)
             };
 
             //Act
             var response1 = await _client.PutAsJsonAsync(url1, request1); //test inconsistent id
-            var response2 = await _client.PutAsJsonAsync(url2, request2); //test inalid id
+            var response2 = await _client.PutAsJsonAsync(url2, request2); //test inavlid id
             var response3 = await _client.PutAsJsonAsync(url3, request3); //test invalid user
             var response4 = await _client.PutAsJsonAsync(url4, request4); //test inconsistent employeeId
             var response5 = await _client.PutAsJsonAsync(url4, request5); //test invalid data
@@ -223,18 +234,18 @@ namespace ScheduleApiTest.Systems.Controllers {
         public async Task Requests_Delete_ReturnSuccess() {
             //Arrange
             string url1 = "/api/Requests/8";
-            string url2 = "/api/Employees/1111111";
+            string url2 = "/api/Employees/3333333";
             string url3 = "/api/Requests/9";
             string url4 = "/api/Requests/10";
 
             //Act
-            var response = await _client.DeleteAsync(url1); //test delete single request
+            var response1 = await _client.DeleteAsync(url1); //test delete single request
             var response2 = await _client.DeleteAsync(url2); //test delete employee should also delete requests
             var response3 = await _client.GetAsync(url3); // test if request is actually deleted
             var response4 = await _client.GetAsync(url4); // test if request is actually deleted
 
             //Assert
-            response.EnsureSuccessStatusCode();
+            response1.EnsureSuccessStatusCode();
             response2.EnsureSuccessStatusCode();
             response3.StatusCode.Should().Be(HttpStatusCode.NotFound);
             response4.StatusCode.Should().Be(HttpStatusCode.NotFound);

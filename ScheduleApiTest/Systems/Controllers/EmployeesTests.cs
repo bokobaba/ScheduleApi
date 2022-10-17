@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace ScheduleApiTest.Systems.Controllers {
+    [Collection("ScheduleApi")]
     public class EmployeesTests : IClassFixture<CustomWebApplicationFactory<Program>> {
         private readonly CustomWebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
@@ -21,7 +22,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             _client = _factory.CreateClient();
 
             Utilities.SetClientToken(_client);
-}
+        }
 
         [Fact]
         public async Task Employees_Get_ReturnSuccess() {
@@ -134,7 +135,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             };
 
             //Act
-            await _client.PostAsJsonAsync(url, request1);   
+            await _client.PostAsJsonAsync(url, request1);
             var response1 = await _client.PostAsJsonAsync(url, request1); //test id already exists
             var response2 = await _client.PostAsJsonAsync(url, request2); //test missing data
 
@@ -174,7 +175,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             string url2 = "/api/Employees/6439171";
             string url3 = "/api/Employees/7654321";
             var request = new UpdateEmployeeDto() {
-                EmployeeId = 6439174,
+                EmployeeId = 6439173,
                 Name = "ParkerTest"
             };
             var request2 = new UpdateEmployeeDto() {
@@ -186,15 +187,15 @@ namespace ScheduleApiTest.Systems.Controllers {
                 Name = "Invalid User"
             };
 
-                //Act
+            //Act
             var response1 = await _client.PutAsJsonAsync(url2, request);  //test inconsistent id
             var response2 = await _client.PutAsJsonAsync(url2, request2); //test inalid id
             var response3 = await _client.PutAsJsonAsync(url2, request3); //test invalid user
 
             //Assert
-            response1.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            response1.StatusCode.Should().Be(HttpStatusCode.NotFound);
             response2.StatusCode.Should().Be(HttpStatusCode.NotFound);
-            response3.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            response3.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
         [Fact]

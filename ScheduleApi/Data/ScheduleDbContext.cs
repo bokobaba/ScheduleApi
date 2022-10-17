@@ -8,7 +8,7 @@ namespace ScheduleApi.Data {
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<UserRefreshToken> RefreshTokens { get; set; }
+        public DbSet<RuleGroup> RuleGroups { get; set; }
 
         public ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : base(options) { }
 
@@ -52,7 +52,7 @@ namespace ScheduleApi.Data {
             Employee? employee = await Employees.FirstOrDefaultAsync(e =>
                 e.EmployeeId == employeeId &&
                 e.UserId == GetUserId(ctx));
-            if (employee.UserId != GetUserId(ctx)) {
+            if (employee == null || employee.UserId != GetUserId(ctx)) {
                 throw new KeyNotFoundException(IdNotFoundMessage("employee", employeeId));
             }
         }

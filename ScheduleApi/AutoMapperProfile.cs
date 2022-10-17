@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ScheduleApi.Dtos.EmployeeDtos;
 using ScheduleApi.Dtos.RequestDtos;
+using ScheduleApi.Dtos.RuleGroupDtos;
 using ScheduleApi.Dtos.ScheduleDtos;
 using ScheduleApi.Models;
 
@@ -18,6 +19,9 @@ namespace ScheduleApi {
             CreateMap<Schedule, GetScheduleDto>();
             CreateMap<AddScheduleDto, Schedule>();
             CreateMap<UpdateScheduleDto, Schedule>();
+
+            CreateMap<RuleGroup, GetRuleGroupDto>();
+            CreateMap<SaveRuleGroupDto, RuleGroup>();
         }
     }
 }

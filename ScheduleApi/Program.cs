@@ -9,6 +9,7 @@ using ScheduleApi.Filters;
 using ScheduleApi.Services.AuthService;
 using ScheduleApi.Services.EmployeeService;
 using ScheduleApi.Services.RequestService;
+using ScheduleApi.Services.RuleGroupService;
 using ScheduleApi.Services.ScheduleService;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection.Metadata.Ecma335;
@@ -63,6 +64,7 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<IRuleGroupService, RuleGroupService>();
 
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

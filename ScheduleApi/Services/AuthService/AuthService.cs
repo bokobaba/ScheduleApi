@@ -90,40 +90,41 @@ namespace ScheduleApi.Services.AuthService {
         }
 
         private async Task SaveRefreshToken(User user, string refreshToken, string token) {
-            var userRefreshToken = new UserRefreshToken() {
-                Token = token,
-                RefreshToken = refreshToken,
-                Expires = DateTime.UtcNow.AddDays(7),
-                Created = DateTime.UtcNow,
-                IpAddress = _contextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
-                IsInvalidated = false,
-                UserId = user.ID,
-            };
+            //var userRefreshToken = new UserRefreshToken() {
+            //    Token = token,
+            //    RefreshToken = refreshToken,
+            //    Expires = DateTime.UtcNow.AddDays(7),
+            //    Created = DateTime.UtcNow,
+            //    IpAddress = _contextAccessor.HttpContext.Connection.RemoteIpAddress.ToString(),
+            //    IsInvalidated = false,
+            //    UserId = user.ID,
+            //};
 
-            _context.RefreshTokens.Add(userRefreshToken);
-            await _context.SaveChangesAsync();
+            //_context.RefreshTokens.Add(userRefreshToken);
+            //await _context.SaveChangesAsync();
         }
 
         private async Task<User> GetUserFromRefreshToken(RefreshTokenRequest request) {
-            var token = GetJwtToken(request.ExpiredToken);
+            //var token = GetJwtToken(request.ExpiredToken);
 
-            UserRefreshToken? userRefreshToken = _context.RefreshTokens
-                .Include(r => r.User)
-                .FirstOrDefault(
-                r => r.IsInvalidated == false && 
-                r.Token == request.ExpiredToken &&
-                r.RefreshToken == request.RefreshToken && 
-                r.IpAddress == _contextAccessor.HttpContext.Connection.RemoteIpAddress.ToString());
+            //UserRefreshToken? userRefreshToken = _context.RefreshTokens
+            //    .Include(r => r.User)
+            //    .FirstOrDefault(
+            //    r => r.IsInvalidated == false && 
+            //    r.Token == request.ExpiredToken &&
+            //    r.RefreshToken == request.RefreshToken && 
+            //    r.IpAddress == _contextAccessor.HttpContext.Connection.RemoteIpAddress.ToString());
 
-            if (userRefreshToken.User == null)
-                throw new AppException("Invalid token Details");
+            //if (userRefreshToken.User == null)
+            //    throw new AppException("Invalid token Details");
 
-            ValidateDetails(token, userRefreshToken);
+            //ValidateDetails(token, userRefreshToken);
 
-            userRefreshToken.IsInvalidated = true;
-            await _context.SaveChangesAsync();
+            //userRefreshToken.IsInvalidated = true;
+            //await _context.SaveChangesAsync();
 
-            return userRefreshToken.User;
+            //return userRefreshToken.User;
+            return null;
         }
 
         private void ValidateDetails(JwtSecurityToken token, UserRefreshToken? userRefreshToken) {
@@ -137,10 +138,11 @@ namespace ScheduleApi.Services.AuthService {
         }
 
         public async Task<bool> IsTokenIpAddressValid(string accessToken, string ipAddress) {
-            bool isValid = _context.RefreshTokens.FirstOrDefaultAsync(
-                r => r.Token == accessToken &&
-                r.IpAddress == ipAddress) != null;
-            return await Task.FromResult(isValid);
+            //bool isValid = _context.RefreshTokens.FirstOrDefaultAsync(
+            //    r => r.Token == accessToken &&
+            //    r.IpAddress == ipAddress) != null;
+            //return await Task.FromResult(isValid);
+            return false;
         }
 
         private static void CreatePasswordHash(string password, out byte[] passwordHash,

@@ -13,8 +13,11 @@ using ScheduleApiTest.Models;
 namespace ScheduleApiTest.Fixtures {
     public class CustomWebApplicationFactory<Program>
     : WebApplicationFactory<Program> where Program : class {
+        public static bool init = false;
 
         protected override void ConfigureWebHost(IWebHostBuilder builder) {
+            if (init) return;
+            init = true;
             builder.ConfigureServices(services => {
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<ScheduleDbContext>));

@@ -35,9 +35,24 @@ namespace ScheduleApiTest.Helpers {
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
             },
             new Employee() {
+                Name = "Delete Recursive",
+                EmployeeId = 3333333,
+                UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+            },
+            new Employee() {
                 Name = "InvalidUser2",
                 EmployeeId = 2222222,
                 UserId = "a8XPDboKMpGRlFw1xUx4Xzrz94OrF5qH@clients"
+            },
+            new Employee() {
+                Name = "Delete Schedule Recursive",
+                EmployeeId = 4444444,
+                UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients"
+            },
+            new Employee() {
+                Name = "Delete Request Recursive",
+                EmployeeId = 5555555,
+                UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients"
             }
 
         };
@@ -45,60 +60,70 @@ namespace ScheduleApiTest.Helpers {
             new Request() {
                 EmployeeId = 6439174,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow,
                 End = DateTime.UtcNow.AddHours(3)
             },
             new Request() {
                 EmployeeId = 6439174,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow.AddDays(2),
                 End = DateTime.UtcNow.AddDays(2).AddHours(3)
             },
             new Request() {
                 EmployeeId = 1234567,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow,
                 End = DateTime.UtcNow.AddHours(3)
             },
             new Request() {
                 EmployeeId = 1234567,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow.AddDays(2),
                 End = DateTime.UtcNow.AddDays(2).AddHours(3)
             },
             new Request() { //invalid User
                 EmployeeId = 7654321,
                 UserId = "a8XPDboKMpGRlFw1xUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow,
                 End = DateTime.UtcNow.AddHours(3)
             },
             new Request() { //invalid User
                 EmployeeId = 7654321,
                 UserId = "a8XPDboKMpGRlFw1xUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow.AddDays(2),
                 End = DateTime.UtcNow.AddDays(2).AddHours(3)
             },
             new Request() { //Test Update
                 EmployeeId = 1234566,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow.AddDays(2),
                 End = DateTime.UtcNow.AddDays(2).AddHours(3)
             },
             new Request() { //Test Delete
-                EmployeeId = 1111111,
+                EmployeeId = 5555555,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow.AddDays(2),
                 End = DateTime.UtcNow.AddDays(2).AddHours(3)
             },
-            new Request() { //Test Delete Cascade
-                EmployeeId = 1111111,
+            new Request() { //Test Delete Recursive
+                EmployeeId = 3333333,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow.AddDays(2),
                 End = DateTime.UtcNow.AddDays(2).AddHours(3)
             },
-            new Request() { //Test Delete Cascade
-                EmployeeId = 1111111,
+            new Request() { //Test Delete Recursive
+                EmployeeId = 3333333,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Description = "None",
                 Start = DateTime.UtcNow.AddDays(2),
                 End = DateTime.UtcNow.AddDays(2).AddHours(3)
             },
@@ -177,7 +202,7 @@ namespace ScheduleApiTest.Helpers {
                 End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() { //Test Delete
-                EmployeeId = 1111111,
+                EmployeeId = 4444444,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
                 Week = 1,
                 Year = 2022,
@@ -186,7 +211,7 @@ namespace ScheduleApiTest.Helpers {
                 End = DateTime.UtcNow.AddDays(1).ToShortTimeString(),
             },
             new Schedule() { //Test Delete Cascade
-                EmployeeId = 1111111,
+                EmployeeId = 3333333,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
                 Week = 1,
                 Year = 2022,
@@ -195,7 +220,7 @@ namespace ScheduleApiTest.Helpers {
                 End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
             new Schedule() { //Test Delete Cascade
-                EmployeeId = 1111111,
+                EmployeeId = 3333333,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
                 Week = 1,
                 Year = 2022,
@@ -203,13 +228,37 @@ namespace ScheduleApiTest.Helpers {
                 Start = DateTime.UtcNow.ToShortTimeString(),
                 End = DateTime.UtcNow.AddDays(1).ToShortTimeString()
             },
+        };
 
+        public static List<RuleGroup> seedingRules = new List<RuleGroup>() {
+            new RuleGroup() {
+                Name = "Rule: 1",
+                Priority = 0,
+                Status = true,
+                UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Rules = "Day:Monday;AND,Employee:Josh"
+            },
+            new RuleGroup() {
+                Name = "Rule: 2",
+                Priority = 1,
+                Status = true,
+                UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Rules = "Day:Tuesday;AND,Employee:John;OR,Employee:Josh"
+            },
+            new RuleGroup() {
+                Name = "Invalid User",
+                Priority = 2,
+                Status = true,
+                UserId = "a8XPDboKMpGRlFw1xUx4Xzrz94OrF5qH@clients",
+                Rules = "Day:Monday;AND,Employee:Josh"
+            },
         };
 
         public static void InitializeDbForTests(ScheduleDbContext db) {
             db.Employees.AddRange(seedingEmployees);
             db.Requests.AddRange(seedingRequests);
             db.Schedules.AddRange(seedingSchedules);
+            db.RuleGroups.AddRange(seedingRules);
             db.SaveChanges();
         }
 
@@ -217,6 +266,7 @@ namespace ScheduleApiTest.Helpers {
             db.Employees.RemoveRange(db.Employees);
             db.Requests.RemoveRange(db.Requests);
             db.Schedules.RemoveRange(db.Schedules);
+            db.RuleGroups.RemoveRange(db.RuleGroups);
             InitializeDbForTests(db);
         }
 
