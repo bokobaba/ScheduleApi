@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ScheduleApi.Dtos.RequestDtos;
 using ScheduleApi.Dtos.ShiftDtos;
@@ -17,7 +16,7 @@ namespace ScheduleApi.Controllers {
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<GetRequestDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<GetShiftDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get() {
             IEnumerable<GetShiftDto> response = await _service.GetAllShifts();
 
@@ -25,7 +24,7 @@ namespace ScheduleApi.Controllers {
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(GetRequestDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetShiftDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id) {
             GetShiftDto response = await _service.GetById(id);
@@ -47,7 +46,7 @@ namespace ScheduleApi.Controllers {
         }
 
         [HttpPut]
-        [ProducesResponseType(typeof(GetRequestDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetShiftDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update(UpdateShiftDto request) {
             GetShiftDto response = await _service.UpdateShift(request);
