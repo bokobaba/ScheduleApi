@@ -94,6 +94,9 @@ namespace ScheduleApi.Services.AvailabilityService {
                 .Where(a => a.UserId == userId && a.EmployeeId == id)
                 .ToListAsync();
 
+            if (toDelete.Count == 0)
+                throw new KeyNotFoundException("Availability not found for employee " + id);
+
             _context.Availability.RemoveRange(toDelete);
             await _context.SaveChangesAsync();
         }
