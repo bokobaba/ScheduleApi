@@ -39,6 +39,7 @@ namespace ScheduleApi.Services.AvailabilityService {
         }
 
         public async Task<IEnumerable<GetAvailabilityDto>> CreateAvailability(int id) {
+            await _context.CheckEmployeeUserValid(id, _contextAccessor);
             string userId = GetUserId(_contextAccessor);
 
             // create Availability for each day of week
@@ -65,26 +66,29 @@ namespace ScheduleApi.Services.AvailabilityService {
             UpdateEmployeeAvailabilityDto request) {
             string userId = GetUserId(_contextAccessor);
 
-            List<Availability> toUpdate = await _context.Availability
-                .Where(a => a.UserId == userId && a.EmployeeId == request.EmployeeId)
-                .ToListAsync();
+            List<Availability> updated = new List<Availability>();
+            foreach(UpdateAvailabilityDto update in request.EmployeeAvailability) {
+                Availability? entry = await _context.Availability
+                .FirstOrDefaultAsync(a =>
+                    a.UserId == userId &&
+                    a.EmployeeId == request.EmployeeId &&
+                    a.Day == update.Day);
+                if (entry == null)
+                    throw new KeyNotFoundException(string.Format(
+                        "Availaibility not found for employee {0} on day {1}",
+                        request.EmployeeId, update.Day));
 
-            toUpdate.ForEach(a => {
-                UpdateAvailabilityDto? update = request.EmployeeAvailability
-                .Find(r => r.Day == a.Day);
+                entry.Enabled = update.Enabled;
+                entry.AllDay = update.AllDay;
+                entry.Start = update.Start;
+                entry.End = update.End;
 
-                if (update == null)
-                    throw new AppException(string.Format("missing day in request: {0}", a.Day));
-
-                a.Enabled = update.Enabled;
-                a.AllDay = update.AllDay;
-                a.Start = update.Start;
-                a.End = update.End;
-            });
+                updated.Add(entry);
+            };
 
             await _context.SaveChangesAsync();
 
-            return toUpdate.Select(u => _mapper.Map<GetAvailabilityDto>(u));
+            return updated.Select(u => _mapper.Map<GetAvailabilityDto>(u));
         }
 
         public async Task DeleteAvailability(int id) {

@@ -2,7 +2,7 @@
 
 namespace ScheduleApi.Dtos.AvailabilityDtos {
     public class UpdateAvailabilityDto {
-        [Range(0, 7, ErrorMessage = "Value for {0} must be between {1} and {2}.")]
+        [Range(0, 6, ErrorMessage = "Value for {0} must be between {1} and {2}.")]
         public int Day { get; set; }
         [Required]
         public bool Enabled { get; set; }

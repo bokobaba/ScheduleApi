@@ -14,6 +14,8 @@ using ScheduleApi.Services.RuleGroupService;
 using ScheduleApi.Services.ScheduleService;
 using ScheduleApi.Services.ShiftService;
 using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
+using System;
 using System.Reflection.Metadata.Ecma335;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -44,6 +44,10 @@ namespace ScheduleApi.Extensions {
                     response.StatusCode = (int)HttpStatusCode.NotFound;
                     errorResponse.Message = ex.Message;
                     break;
+                case TaskCanceledException ex:
+                    response.StatusCode = (int)HttpStatusCode.RequestTimeout;
+                    errorResponse.Message = "Connection Timeout";
+                    break;
                 default:
                     if (exception.InnerException != null && exception.InnerException.Message.Contains("duplicate")) {
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -51,7 +55,7 @@ namespace ScheduleApi.Extensions {
                         break;
                     }
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    errorResponse.Message = "Internal Server errors." + exception.Message;
+                    errorResponse.Message = "Internal Server errors.";
                     break;
             }
             var result = JsonSerializer.Serialize(errorResponse);

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ScheduleApi.Dtos.RequestDtos;
 using ScheduleApi.Dtos.ShiftDtos;
 using ScheduleApi.Services.ShiftService;
 
 namespace ScheduleApi.Controllers {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ShiftsController : ControllerBase {
@@ -53,7 +55,7 @@ namespace ScheduleApi.Controllers {
             return Ok(response);
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id) {
