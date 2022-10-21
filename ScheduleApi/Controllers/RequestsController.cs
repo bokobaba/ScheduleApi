@@ -18,12 +18,11 @@ namespace ScheduleApi.Controllers {
         }
 
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(IEnumerable<GetRequestDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get() {
             IEnumerable<GetRequestDto>? response = await _service.GetAllRequests();
 
-            return response == null ? NoContent() : Ok(response);
+            return Ok(response);
         }
 
         [HttpGet("{id}")]

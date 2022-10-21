@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using ScheduleApi.Dtos.AvailabilityDtos;
 using ScheduleApi.Dtos.EmployeeDtos;
 using ScheduleApi.Dtos.RequestDtos;
 using ScheduleApi.Dtos.RuleGroupDtos;
 using ScheduleApi.Dtos.ScheduleDtos;
+using ScheduleApi.Dtos.ShiftDtos;
 using ScheduleApi.Models;
 
 namespace ScheduleApi {
@@ -22,6 +24,13 @@ namespace ScheduleApi {
 
             CreateMap<RuleGroup, GetRuleGroupDto>();
             CreateMap<SaveRuleGroupDto, RuleGroup>();
+
+            CreateMap<Shift, GetShiftDto>();
+            CreateMap<UpdateShiftDto, Shift>();
+            CreateMap<AddShiftDto, Shift>();
+
+            CreateMap<Availability, GetAvailabilityDto>();
+            CreateMap<UpdateAvailabilityDto, Availability>();
         }
     }
 }

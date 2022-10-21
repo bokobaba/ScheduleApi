@@ -16,5 +16,6 @@ namespace ScheduleApi.Models {
 
         public List<Request>? Requests { get; set; }
         public List<Schedule>? Schedules { get; set; }
+        public List<Availability>? Availability { get; set; }
     }
 }

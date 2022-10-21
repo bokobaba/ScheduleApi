@@ -127,12 +127,8 @@ namespace ScheduleApi.Services.ScheduleService {
 
             string userId = GetUserId(_contextAccessor);
 
-            foreach (SaveEmployeeDaySchedule toSave in request.Schedules) { 
-                if (await _context.Schedules.AnyAsync(s => 
-                        s.EmployeeId == toSave.EmployeeId && 
-                        s.UserId != userId)) {
-                    throw new KeyNotFoundException(IdNotFoundMessage("employee", toSave.EmployeeId));
-                }
+            foreach (SaveEmployeeDaySchedule toSave in request.Schedules) {
+                await _context.CheckEmployeeUserValid(toSave.EmployeeId, _contextAccessor);
             }
             
             List<GetScheduleDto> updated = new List<GetScheduleDto>();

@@ -6,7 +6,7 @@ namespace ScheduleApi.Dtos.ScheduleDtos {
         public int Year { get; set; }
         [Range(1, int.MaxValue)]
         public int Week { get; set; }
-        [Range(1, int.MaxValue)]
+        [Range(1, 31)]
         public int Day { get; set; }
         public string? Start { get; set; }
         public string? End { get; set; }

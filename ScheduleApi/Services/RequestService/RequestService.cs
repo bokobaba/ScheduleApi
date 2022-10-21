@@ -44,11 +44,11 @@ namespace ScheduleApi.Services.RequestService {
 
         public async Task<IEnumerable<GetRequestDto>?> GetAllRequests() {
             string userId = GetUserId(_contextAccessor);
-            IEnumerable<Request>? requests = await _context.Requests
+            List<Request> requests = await _context.Requests
                 .Where(r => r.UserId == userId)
                 .ToListAsync();
 
-            return requests?.Select(r => _mapper.Map<GetRequestDto>(r)).ToList();
+            return requests.Select(r => _mapper.Map<GetRequestDto>(r)).ToList();
         }
 
         public async Task<GetRequestDto> GetReqeustById(int id) {

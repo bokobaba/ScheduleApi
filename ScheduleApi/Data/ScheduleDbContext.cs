@@ -9,6 +9,8 @@ namespace ScheduleApi.Data {
         public DbSet<Request> Requests { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<RuleGroup> RuleGroups { get; set; }
+        public DbSet<Shift> Shifts { get; set; }
+        public DbSet<Availability> Availability { get; set; }
 
         public ScheduleDbContext(DbContextOptions<ScheduleDbContext> options) : base(options) { }
 
@@ -32,6 +34,16 @@ namespace ScheduleApi.Data {
 
             builder.Entity<Schedule>()
                 .HasIndex(s => new { s.UserId, s.Week, s.Year, s.EmployeeId, s.Day }).IsUnique();
+
+            builder.Entity<Employee>()
+                .HasMany(e => e.Availability)
+                .WithOne(a => a.Employee)
+                .HasPrincipalKey(e => new { e.UserId, e.EmployeeId })
+                .HasForeignKey(a => new { a.UserId, a.EmployeeId })
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Availability>()
+                .HasIndex(a => new { a.UserId, a.EmployeeId, a.Day }).IsUnique();
         }
 
         public async Task<Employee> CheckEmployeeValid(int employeeId) {
