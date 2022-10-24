@@ -29,24 +29,47 @@ namespace ScheduleApi.Services.EmployeeService {
 
         public async Task<IEnumerable<GetEmployeeDto>?> GetAllEmployees() {
             IEnumerable<Employee> employees = await _context.Employees
-                .Include(e => e.Requests)
                 .Where(e => e.UserId == GetUserId(_contextAccessor))
                 .ToListAsync();
 
             return employees.Select(e => _mapper.Map<GetEmployeeDto>(e)).ToList();
         }
 
-        public async Task<GetEmployeeDto> GetEmployeeById(int id) {
+        public async Task<IEnumerable<GetEmployeeInfoDto>> GetAllEmployeeInfo() {
+            string userId = GetUserId(_contextAccessor);
+            IEnumerable<Employee> employees = await _context.Employees
+                .Where(e => e.UserId == userId)
+                .Include(e => e.Requests)
+                .Include(e => e.Availability)
+                .Include(e => e.Schedules)
+                .ToListAsync();
+
+            return employees.Select(e => _mapper.Map<GetEmployeeInfoDto>(e)).ToList();
+        }
+
+        public async Task<GetEmployeeInfoDto> GetEmployeeInfo(int id) {
             string userId = GetUserId(_contextAccessor);
             Employee? employee = await _context.Employees
-                .Include(_e => _e.Requests)
+                .Include(e => e.Requests)
+                .Include(e => e.Availability)
+                .Include(e => e.Schedules)
                 .FirstOrDefaultAsync(e => e.UserId == userId && e.EmployeeId == id);
 
             if (employee == null) {
                 throw new KeyNotFoundException(IdNotFoundMessage("employee", id));
             }
 
-            string str = employee.UserId;
+            return _mapper.Map<GetEmployeeInfoDto>(employee);
+        }
+
+        public async Task<GetEmployeeDto> GetEmployeeById(int id) {
+            string userId = GetUserId(_contextAccessor);
+            Employee? employee = await _context.Employees
+                .FirstOrDefaultAsync(e => e.UserId == userId && e.EmployeeId == id);
+
+            if (employee == null) {
+                throw new KeyNotFoundException(IdNotFoundMessage("employee", id));
+            }
 
             return _mapper.Map<GetEmployeeDto>(employee);
         }

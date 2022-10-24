@@ -23,6 +23,24 @@ namespace ScheduleApi.Controllers {
             return Ok(response);
         }
 
+        [HttpGet("EmployeeInfo")]
+        [ProducesResponseType(typeof(IEnumerable<GetEmployeeInfoDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetEmployeeInfo() {
+            IEnumerable<GetEmployeeInfoDto> response = await _service.GetAllEmployeeInfo();
+
+            return Ok(response);
+        }
+
+        [HttpGet("EmployeeInfo/{id}")]
+        [ProducesResponseType(typeof(GetEmployeeInfoDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetEmployeeInfo(int id) {
+            GetEmployeeInfoDto response = await _service.GetEmployeeInfo(id);
+
+            return Ok(response);
+        }
+
+
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(GetEmployeeDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

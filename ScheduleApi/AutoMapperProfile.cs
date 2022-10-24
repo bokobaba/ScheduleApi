@@ -11,6 +11,7 @@ namespace ScheduleApi {
     public class AutoMapperProfile : Profile {
         public AutoMapperProfile() {
             CreateMap<Employee, GetEmployeeDto>();
+            CreateMap<Employee, GetEmployeeInfoDto>();
             CreateMap<AddEmployeeDto, Employee>();
             CreateMap<UpdateEmployeeDto, Employee>();
 

@@ -8,5 +8,7 @@ namespace ScheduleApi.Services.EmployeeService {
         Task<GetEmployeeDto> AddEmployee(AddEmployeeDto employee);
         Task<GetEmployeeDto> UpdateEmployee(UpdateEmployeeDto employee);
         Task DeleteEmployee(int id);
+        Task<IEnumerable<GetEmployeeInfoDto>> GetAllEmployeeInfo();
+        Task<GetEmployeeInfoDto> GetEmployeeInfo(int id);
     }
 }
