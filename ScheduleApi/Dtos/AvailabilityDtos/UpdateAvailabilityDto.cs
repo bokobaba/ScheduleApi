@@ -8,9 +8,7 @@ namespace ScheduleApi.Dtos.AvailabilityDtos {
         public bool Enabled { get; set; }
         [Required]
         public bool AllDay { get; set; }
-        [Required]
         public string Start { get; set; }
-        [Required]
         public string End { get; set; }
     }
 }
