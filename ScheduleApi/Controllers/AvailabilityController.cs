@@ -46,7 +46,7 @@ namespace ScheduleApi.Controllers {
         }
 
         [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof (IEnumerable<GetAvailabilityDto>),StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update(UpdateEmployeeAvailabilityDto request) {
             IEnumerable<GetAvailabilityDto> response = await _service.UpdateAvailability(request);
