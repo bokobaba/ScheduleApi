@@ -34,7 +34,7 @@ namespace ScheduleApi.Controllers {
         [HttpGet("EmployeeInfo/{id}")]
         [ProducesResponseType(typeof(GetEmployeeInfoDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetEmployeeInfo(int id) {
+        public async Task<IActionResult> GetEmployeeInfoById(int id) {
             GetEmployeeInfoDto response = await _service.GetEmployeeInfo(id);
 
             return Ok(response);
