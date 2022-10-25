@@ -19,8 +19,6 @@ namespace ScheduleApi.Services.RequestService {
         }
 
         public async Task<GetRequestDto> AddRequest(AddRequestDto newRequest) {
-            await _context.CheckEmployeeUserValid(newRequest.EmployeeId, _contextAccessor);
-
             Request request = _mapper.Map<Request>(newRequest);
             request.UserId = GetUserId(_contextAccessor);
 
@@ -36,8 +34,6 @@ namespace ScheduleApi.Services.RequestService {
             if (toDelete == null || toDelete.UserId != GetUserId(_contextAccessor))
                 throw new KeyNotFoundException(IdNotFoundMessage("request", id));
 
-            //await _context.CheckUserValid("request", id, toDelete.EmployeeId, _contextAccessor);
-
             _context.Requests.Remove(toDelete);
             await _context.SaveChangesAsync();
         }
@@ -45,6 +41,7 @@ namespace ScheduleApi.Services.RequestService {
         public async Task<IEnumerable<GetRequestDto>?> GetAllRequests() {
             string userId = GetUserId(_contextAccessor);
             List<Request> requests = await _context.Requests
+                .AsNoTracking()
                 .Where(r => r.UserId == userId)
                 .ToListAsync();
 
@@ -52,7 +49,10 @@ namespace ScheduleApi.Services.RequestService {
         }
 
         public async Task<GetRequestDto> GetReqeustById(int id) {
-            Request? request = await _context.Requests.FirstOrDefaultAsync(r => r.ID == id);
+            Request? request = await _context.Requests
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.ID == id);
+
             if (request == null || request.UserId != GetUserId(_contextAccessor))
                 throw new KeyNotFoundException(IdNotFoundMessage("request", id));
 
@@ -62,6 +62,7 @@ namespace ScheduleApi.Services.RequestService {
         public async Task<IEnumerable<GetRequestDto>?> GetReqeustsByEmployeeId(int employeeId) {
             string userId = GetUserId(_contextAccessor);
             IEnumerable<Request>? requests = await _context.Requests
+                .AsNoTracking()
                 .Where(r => r.UserId == userId && r.EmployeeId == employeeId)
                 .ToListAsync();
 
@@ -69,7 +70,8 @@ namespace ScheduleApi.Services.RequestService {
         }
 
         public async Task<GetRequestDto> UpdateRequest(UpdateRequestDto updateRequest) {
-            Request? request = await _context.Requests.FirstOrDefaultAsync(r => r.ID == updateRequest.ID);
+            Request? request = await _context.Requests
+                .FirstOrDefaultAsync(r => r.ID == updateRequest.ID);
 
             if (request == null || request.UserId != GetUserId(_contextAccessor))
                 throw new KeyNotFoundException(IdNotFoundMessage("request", updateRequest.ID));

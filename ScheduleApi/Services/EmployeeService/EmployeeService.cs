@@ -83,8 +83,8 @@ namespace ScheduleApi.Services.EmployeeService {
         public async Task<GetEmployeeDto> UpdateEmployee(UpdateEmployeeDto updateEmployee) {
             string userId = GetUserId(_contextAccessor);
             Employee? employee = await _context.Employees
-                .Include(e => e.Requests)
-                .FirstOrDefaultAsync(e => e.UserId == userId && e.EmployeeId == updateEmployee.EmployeeId);
+                .FirstOrDefaultAsync(e => e.UserId == userId && 
+                                     e.EmployeeId == updateEmployee.EmployeeId);
 
             if (employee == null) {
                 throw new KeyNotFoundException(IdNotFoundMessage("employee", updateEmployee.EmployeeId));

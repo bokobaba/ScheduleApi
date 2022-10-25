@@ -50,6 +50,7 @@ namespace ScheduleApi.Services.ScheduleService {
         public async Task<IEnumerable<GetScheduleDto>?> GetAllSchedules() {
             string userId = GetUserId(_contextAccessor);
             List<Schedule>? schedules = await _context.Schedules
+                .AsNoTracking()
                 .Where(s => s.UserId == userId)
                 .ToListAsync();
 
@@ -57,12 +58,13 @@ namespace ScheduleApi.Services.ScheduleService {
         }
 
         public async Task<GetScheduleDto> GetScheduleById(int id) {
-            Schedule? schedule = await _context.Schedules.FirstOrDefaultAsync(s => s.ID == id);
+            string userId = GetUserId(_contextAccessor);
+            Schedule? schedule = await _context.Schedules
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.ID == id && s.UserId == userId);
 
             if (schedule == null || schedule.UserId != GetUserId(_contextAccessor))
                 throw new KeyNotFoundException(IdNotFoundMessage("schedule", id));
-
-            await _context.CheckUserValid("schedule", id, schedule.EmployeeId, _contextAccessor);
 
             return _mapper.Map<GetScheduleDto>(schedule);
         }
@@ -70,12 +72,14 @@ namespace ScheduleApi.Services.ScheduleService {
         public async Task<GetScheduleDto> GetScheduleByDayEmployee(EmployeeDayScheduleDto request) {
             string userId = GetUserId(_contextAccessor);
 
-            Schedule? schedule = await _context.Schedules.FirstOrDefaultAsync(s =>
-                s.Week == request.Week &&
-                s.Year == request.Year &&
-                s.UserId == userId &&
-                s.EmployeeId == request.EmployeeId &&
-                s.Day == request.Day);
+            Schedule? schedule = await _context.Schedules
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s =>
+                    s.Week == request.Week &&
+                    s.Year == request.Year &&
+                    s.UserId == userId &&
+                    s.EmployeeId == request.EmployeeId &&
+                    s.Day == request.Day);
 
             if (schedule == null)
                 throw new KeyNotFoundException(ScheduleNotFoundMessage(request));
@@ -86,6 +90,7 @@ namespace ScheduleApi.Services.ScheduleService {
         public async Task<IEnumerable<GetScheduleDto>> GetSchedulesByEmployeeId(int id) {
             string userId = GetUserId(_contextAccessor);
             List<Schedule> schedules = await _context.Schedules
+                .AsNoTracking()
                 .Where(s => s.UserId == userId && s.EmployeeId == id)
                 .ToListAsync();
 
@@ -96,6 +101,7 @@ namespace ScheduleApi.Services.ScheduleService {
             string userId = GetUserId(_contextAccessor);
 
             List<Schedule> schedules = await _context.Schedules
+                .AsNoTracking()
                 .Where(s => 
                     s.Week == request.week && 
                     s.Year == request.year && 
@@ -110,6 +116,7 @@ namespace ScheduleApi.Services.ScheduleService {
             string userId = GetUserId(_contextAccessor);
 
             List<Schedule> schedules = await _context.Schedules
+                .AsNoTracking()
                 .Where(s =>
                     s.Week == request.week &&
                     s.Year == request.year &&
@@ -122,16 +129,12 @@ namespace ScheduleApi.Services.ScheduleService {
         }
 
         public async Task<IEnumerable<GetScheduleDto>> SaveWeeklySchedule(SaveWeeklyScheduleDto request) {
+            List<GetScheduleDto> updated = new List<GetScheduleDto>();
+
             if (request.Schedules == null || request.Schedules.Count < 1)
-                throw new AppException("No schedules provided to save");
+                return updated;
 
             string userId = GetUserId(_contextAccessor);
-
-            foreach (SaveEmployeeDaySchedule toSave in request.Schedules) {
-                await _context.CheckEmployeeUserValid(toSave.EmployeeId, _contextAccessor);
-            }
-            
-            List<GetScheduleDto> updated = new List<GetScheduleDto>();
 
             foreach(SaveEmployeeDaySchedule toSave in request.Schedules) {
                 Schedule? schedule = await _context.Schedules
@@ -185,11 +188,6 @@ namespace ScheduleApi.Services.ScheduleService {
                         updatedSchedule.Year,
                         updatedSchedule.EmployeeId
                     }));
-
-            if (schedule.EmployeeId != updatedSchedule.EmployeeId)
-                throw new AppException(string.Format(
-                    "employeeId = {0} does not match that of stored value = {1}", 
-                    updatedSchedule.EmployeeId, schedule.EmployeeId));
 
             schedule.Start = updatedSchedule.Start;
             schedule.End = updatedSchedule.End;

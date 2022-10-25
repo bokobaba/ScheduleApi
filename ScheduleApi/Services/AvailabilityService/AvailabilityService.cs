@@ -22,6 +22,7 @@ namespace ScheduleApi.Services.AvailabilityService {
             string userId = GetUserId(_contextAccessor);
 
             List<Availability> availabilities = await _context.Availability
+                .AsNoTracking()
                 .Where(a => a.UserId == userId)
                 .ToListAsync();
 
@@ -32,6 +33,7 @@ namespace ScheduleApi.Services.AvailabilityService {
             string userId = GetUserId(_contextAccessor);
 
             List<Availability> availabilities = await _context.Availability
+                .AsNoTracking()
                 .Where(a => a.UserId == userId && a.EmployeeId == id)
                 .ToListAsync();
 
@@ -39,7 +41,6 @@ namespace ScheduleApi.Services.AvailabilityService {
         }
 
         public async Task<IEnumerable<GetAvailabilityDto>> CreateAvailability(int id) {
-            await _context.CheckEmployeeUserValid(id, _contextAccessor);
             string userId = GetUserId(_contextAccessor);
 
             // create Availability for each day of week

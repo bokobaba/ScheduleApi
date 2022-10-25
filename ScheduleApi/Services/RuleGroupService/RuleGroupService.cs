@@ -21,6 +21,7 @@ namespace ScheduleApi.Services.RuleGroupService {
         public async Task<IEnumerable<GetRuleGroupDto>> GetRuleGroups() {
             string userId = GetUserId(_contextAccessor);
             List<RuleGroup> ruleGroups = await _context.RuleGroups
+                .AsNoTracking()
                 .Where(r => r.UserId == userId)
                 .ToListAsync();
 
@@ -34,9 +35,11 @@ namespace ScheduleApi.Services.RuleGroupService {
                 rule.UserId = userId;
                 return rule;
             }).ToList();
+
             List<RuleGroup> toRemove = await _context.RuleGroups
                 .Where(r => r.UserId == userId)
                 .ToListAsync();
+
             _context.RuleGroups.RemoveRange(toRemove);
             _context.RuleGroups.AddRange(toSave);
 

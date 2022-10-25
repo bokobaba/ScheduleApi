@@ -22,6 +22,7 @@ namespace ScheduleApi.Services.ShiftService {
             string userId = GetUserId(_contextAccessor);
 
             List<Shift> shifts = await _context.Shifts
+                .AsNoTracking()
                 .Where(s => s.UserId == userId)
                 .ToListAsync();
 
@@ -31,7 +32,9 @@ namespace ScheduleApi.Services.ShiftService {
         public async Task<GetShiftDto> GetById(int id) {
             string userId = GetUserId(_contextAccessor);
 
-            Shift? shift = await _context.Shifts.FirstOrDefaultAsync(s => s.ID == id);
+            Shift? shift = await _context.Shifts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.ID == id);
 
             if (shift == null || shift.UserId != userId) {
                 throw new KeyNotFoundException(IdNotFoundMessage("shift", id));
