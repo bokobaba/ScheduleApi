@@ -27,8 +27,9 @@ namespace ScheduleApi.Services.EmployeeService {
             return _mapper.Map<GetEmployeeDto>(employee);
         }
 
-        public async Task<IEnumerable<GetEmployeeDto>?> GetAllEmployees() {
+        public async Task<IEnumerable<GetEmployeeDto>> GetAllEmployees() {
             IEnumerable<Employee> employees = await _context.Employees
+                .AsNoTracking()
                 .Where(e => e.UserId == GetUserId(_contextAccessor))
                 .ToListAsync();
 
@@ -38,6 +39,8 @@ namespace ScheduleApi.Services.EmployeeService {
         public async Task<IEnumerable<GetEmployeeInfoDto>> GetAllEmployeeInfo() {
             string userId = GetUserId(_contextAccessor);
             IEnumerable<Employee> employees = await _context.Employees
+                .AsSingleQuery()
+                .AsNoTrackingWithIdentityResolution()
                 .Where(e => e.UserId == userId)
                 .Include(e => e.Requests)
                 .Include(e => e.Availability)
@@ -50,6 +53,8 @@ namespace ScheduleApi.Services.EmployeeService {
         public async Task<GetEmployeeInfoDto> GetEmployeeInfo(int id) {
             string userId = GetUserId(_contextAccessor);
             Employee? employee = await _context.Employees
+                .AsSingleQuery()
+                .AsNoTrackingWithIdentityResolution()
                 .Include(e => e.Requests)
                 .Include(e => e.Availability)
                 .Include(e => e.Schedules)
@@ -65,6 +70,7 @@ namespace ScheduleApi.Services.EmployeeService {
         public async Task<GetEmployeeDto> GetEmployeeById(int id) {
             string userId = GetUserId(_contextAccessor);
             Employee? employee = await _context.Employees
+                .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.UserId == userId && e.EmployeeId == id);
 
             if (employee == null) {

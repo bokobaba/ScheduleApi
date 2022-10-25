@@ -18,18 +18,5 @@ namespace ScheduleApi.Models {
         public string UserId { get; set; }
         public int EmployeeId { get; set; }
         public Employee Employee { get; set; }
-
-        public Schedule() {
-
-        }
-
-        public Schedule(int employeeId, int day, int week, int year) {
-            EmployeeId = employeeId;
-            Day = day;
-            Year = year;
-            Week = week;
-            Start = "";
-            End = "";
-        }
     }
 }

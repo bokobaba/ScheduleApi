@@ -14,7 +14,7 @@ namespace ScheduleApi.Models {
         public bool IsInvalidated { get; set; }
 
         public Guid UserId { get; set; }
-        public User? User { get; set; }
+        public virtual User? User { get; set; }
 
         [NotMapped]
         public bool IsActive {
