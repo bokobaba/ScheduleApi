@@ -1,11 +1,17 @@
-﻿using ScheduleApi.Exceptions;
+﻿using Microsoft.EntityFrameworkCore;
+using ScheduleApi.Exceptions;
 using ScheduleApi.Models;
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
 
 namespace ScheduleApi.Extensions {
     public class ExceptionHandlingMiddleware {
         private readonly RequestDelegate _next;
+
+        private static readonly string EXCEPTION_FOREIGN_KEY = "FOREIGN KEY";
+        private static readonly string EXCEPTION_DUPLICATE = "duplicate";
+
         public bool AllowStatusCode404Response { get; set; } = true;
 
 
@@ -48,12 +54,31 @@ namespace ScheduleApi.Extensions {
                     response.StatusCode = (int)HttpStatusCode.RequestTimeout;
                     errorResponse.Message = "Connection Timeout";
                     break;
-                default:
-                    if (exception.InnerException != null && exception.InnerException.Message.Contains("duplicate")) {
-                        response.StatusCode = (int)HttpStatusCode.BadRequest;
-                        errorResponse.Message = "one or more unique keys already exists in database";
-                        break;
+                case DbUpdateException ex:
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                    if (ex.InnerException != null) {
+                        if (ex.InnerException.Message.Contains(EXCEPTION_FOREIGN_KEY)) {
+                            object entity = ex.Entries[0].Entity;
+                            PropertyInfo? prop = entity.GetType().GetProperty("EmployeeId");
+                            if (prop != null) {
+                                var id = prop.GetValue(entity);
+                                errorResponse.Message = string.Format(
+                                    "employee with id: {0} does not exist", id);
+                                break;
+                            }
+                        }
+
+                        if (ex.InnerException.Message.Contains(EXCEPTION_DUPLICATE)) {
+                            string t = ex.Entries[0].Entity.GetType().Name;
+                            errorResponse.Message = string.Format("{0} already exists", t);
+                            break;
+                        }
                     }
+
+                    errorResponse.Message = "invalid request";
+                    break;
+                default:
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     errorResponse.Message = "Internal Server errors.";
                     break;
