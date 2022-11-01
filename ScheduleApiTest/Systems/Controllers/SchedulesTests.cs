@@ -6,18 +6,22 @@ using ScheduleApiTest.Fixtures;
 using ScheduleApiTest.Helpers;
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Policy;
+using Xunit.Abstractions;
 
 namespace ScheduleApiTest.Systems.Controllers {
     [Collection("ScheduleApi")]
     public class SchedulesTests : IClassFixture<CustomWebApplicationFactory<Program>> {
         private readonly CustomWebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
+        private readonly ITestOutputHelper _output;
 
-        public SchedulesTests(CustomWebApplicationFactory<Program> factory) {
+        public SchedulesTests(CustomWebApplicationFactory<Program> factory, ITestOutputHelper output) {
             _factory = factory;
             _client = _factory.CreateClient();
+            _output = output;
 
-            Utilities.SetClientToken(_client);
+            Utilities.SetClientToken(_client, _factory.config);
         }
 
         [Fact]
@@ -328,6 +332,40 @@ namespace ScheduleApiTest.Systems.Controllers {
             //Assert
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
             response2.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task Schedules_Generate_Schedules_ReturnSuccess() {
+            //Arrange
+            Console.SetOut(new ConsoleWriter(_output));
+            string url = "/api/Schedules/GenerateSchedules";
+
+            var request1 = new GenerateScheduleDto() {
+                Year = 2022,
+                Week = 1,
+            };
+
+            //Act
+            HttpRequestMessage request = new HttpRequestMessage {
+                Content = JsonContent.Create(request1),
+                Method = HttpMethod.Post,
+                RequestUri = new Uri(url, UriKind.Relative)
+            };
+            var response = await _client.SendAsync(request);
+
+            //Assert
+            response.EnsureSuccessStatusCode();
+        }
+
+        private class ConsoleWriter : StringWriter {
+            private ITestOutputHelper output;
+            public ConsoleWriter(ITestOutputHelper output) {
+                this.output = output;
+            }
+
+            public override void WriteLine(string m) {
+                output.WriteLine(m);
+            }
         }
     }
 }

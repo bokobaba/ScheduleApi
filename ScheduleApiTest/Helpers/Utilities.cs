@@ -1,5 +1,6 @@
 ﻿
 
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RestSharp;
 using ScheduleApi.Data;
@@ -230,27 +231,49 @@ namespace ScheduleApiTest.Helpers {
             },
         };
 
+        public static List<Shift> seedingShifts = new List<Shift>() {
+            new Shift() {
+                Name = "Shift 1",
+                UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Start = "04:00",
+                End = "12:00"
+            },
+            new Shift() {
+                Name = "Shift 2",
+                UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Start = "09:00",
+                End = "17:00"
+            }
+        };
+
         public static List<RuleGroup> seedingRules = new List<RuleGroup>() {
             new RuleGroup() {
                 Name = "Rule: 1",
-                Priority = 0,
+                Priority = 2,
                 Status = true,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
-                Rules = "Day:Monday;AND,Employee:Josh"
+                Rules = "Day:Monday;Employee:1234567"
             },
             new RuleGroup() {
                 Name = "Rule: 2",
                 Priority = 1,
                 Status = true,
                 UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
-                Rules = "Day:Tuesday;AND,Employee:John;OR,Employee:Josh"
+                Rules = "Day:Tuesday;Employee:6439174;Employee:1234567"
             },
             new RuleGroup() {
                 Name = "Invalid User",
                 Priority = 2,
                 Status = true,
                 UserId = "a8XPDboKMpGRlFw1xUx4Xzrz94OrF5qH@clients",
-                Rules = "Day:Monday;AND,Employee:Josh"
+                Rules = "Day:Monday;Employee:1234567"
+            },
+            new RuleGroup() {
+                Name = "Rule: 1",
+                Priority = 0,
+                Status = true,
+                UserId = "a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH@clients",
+                Rules = "day:not,Wednesday;day:not,Thursday;Employee:6439174;hours:=,40;Day:All;Shift:0"
             },
         };
 
@@ -259,6 +282,7 @@ namespace ScheduleApiTest.Helpers {
             db.Requests.AddRange(seedingRequests);
             db.Schedules.AddRange(seedingSchedules);
             db.RuleGroups.AddRange(seedingRules);
+            db.Shifts.AddRange(seedingShifts);
             db.SaveChanges();
         }
 
@@ -267,15 +291,19 @@ namespace ScheduleApiTest.Helpers {
             db.Requests.RemoveRange(db.Requests);
             db.Schedules.RemoveRange(db.Schedules);
             db.RuleGroups.RemoveRange(db.RuleGroups);
+            db.Shifts.RemoveRange(db.Shifts);
             InitializeDbForTests(db);
         }
 
-        public static void SetClientToken(HttpClient client) {
-            var tokenClient = new RestClient("https://dev-0yfu4fcd.us.auth0.com/oauth/token");
+        public static void SetClientToken(HttpClient client, IConfigurationRoot config) {
+            string clientId = config["Test:clientId"];
+            string secret = config["Test:secret"];
+            string domain = config["Test:authDomain"];
+            var tokenClient = new RestClient(domain);
             var request = new RestRequest();
             request.AddHeader("content-type", "application/json");
             request.AddParameter("application/json",
-                "{\"client_id\":\"a8XPDboKMpGRlF1wxUx4Xzrz94OrF5qH\",\"client_secret\":\"BV4EIi5rqWkUcb8dFwO720dRMH2VFDb5ttL4cP18yvJIJ24zUFqwDE0ZfoGo_Id2\",\"audience\":\"https://scheduleapi20220831111508.azurewebsites.net/api\",\"grant_type\":\"client_credentials\"}", ParameterType.RequestBody);
+                "{\"client_id\":\"" + clientId + "\",\"client_secret\":\"" + secret + "\",\"audience\":\"https://scheduleapi20220831111508.azurewebsites.net/api\",\"grant_type\":\"client_credentials\"}", ParameterType.RequestBody);
             RestResponse response = tokenClient.Post(request);
             var str = response.Content;
             TokenResponse json = JsonConvert.DeserializeObject<TokenResponse>(str);

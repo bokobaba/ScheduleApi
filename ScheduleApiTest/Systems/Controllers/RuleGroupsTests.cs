@@ -15,7 +15,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             _factory = factory;
             _client = _factory.CreateClient();
 
-            Utilities.SetClientToken(_client);
+            Utilities.SetClientToken(_client, _factory.config);
         }
 
         [Fact]

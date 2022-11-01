@@ -14,10 +14,12 @@ namespace ScheduleApiTest.Fixtures {
     public class CustomWebApplicationFactory<Program>
     : WebApplicationFactory<Program> where Program : class {
         public static bool init = false;
+        public IConfigurationRoot config;
 
         protected override void ConfigureWebHost(IWebHostBuilder builder) {
             if (init) return;
             init = true;
+
             builder.ConfigureServices(services => {
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<ScheduleDbContext>));
@@ -25,12 +27,14 @@ namespace ScheduleApiTest.Fixtures {
                 services.Remove(descriptor);
 
                 IConfigurationRoot configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.Development.json")
                 .AddEnvironmentVariables()
                 .Build();
 
+                config = configuration;
+
                 services.AddDbContext<ScheduleDbContext>(options => {
-                    options.UseSqlServer(configuration.GetConnectionString("dbTestConnection"));
+                    options.UseSqlServer(configuration.GetConnectionString("dbConnection"));
                 });
 
                 //services.AddDbContext<ScheduleDbContext>(options => {
