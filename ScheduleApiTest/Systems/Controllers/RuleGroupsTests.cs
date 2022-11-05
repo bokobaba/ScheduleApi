@@ -15,7 +15,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             _factory = factory;
             _client = _factory.CreateClient();
 
-            Utilities.SetClientToken(_client, _factory.config);
+            Utilities.SetClientToken(_client);
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             List<GetRuleGroupDto> rules = JsonConvert.DeserializeObject<List<GetRuleGroupDto>>(str);
 
             rules.Should().NotBeNull();
-            rules.Should().HaveCount(c => c == 2); //accounting for adds and deletes
+            rules.Should().HaveCount(c => c == Utilities.seedingRules.Count - 1); //accounting for adds and deletes
         }
 
         [Fact]

@@ -92,7 +92,7 @@ namespace ScheduleApi.Controllers {
         [ProducesResponseType(typeof(IEnumerable<GetScheduleDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GenerateSchedules(GenerateScheduleDto request) {
-            IEnumerable<GetScheduleDto> schedules = await _service.GenerateSchedule(request);
+            IEnumerable<GetScheduleDto> schedules = await _service.GenerateScheduleFromRules(request);
 
             return Ok(schedules);
         }

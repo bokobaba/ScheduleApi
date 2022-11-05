@@ -44,7 +44,7 @@ namespace ScheduleApi.Services.AvailabilityService {
             string userId = GetUserId(_contextAccessor);
 
             // create Availability for each day of week
-            List<Availability> toAdd = new List<Availability>();
+            List<Availability> toAdd = new();
             for (int i = 0; i < 7; ++i) {
                 toAdd.Add(new Availability {
                     UserId = userId,
@@ -67,7 +67,7 @@ namespace ScheduleApi.Services.AvailabilityService {
             UpdateEmployeeAvailabilityDto request) {
             string userId = GetUserId(_contextAccessor);
 
-            List<Availability> updated = new List<Availability>();
+            List<Availability> updated = new();
             foreach(UpdateAvailabilityDto update in request.EmployeeAvailability) {
                 Availability? entry = await _context.Availability
                 .FirstOrDefaultAsync(a =>

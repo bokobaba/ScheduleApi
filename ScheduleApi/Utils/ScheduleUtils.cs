@@ -1,40 +1,76 @@
-﻿using ScheduleApi.Models;
+﻿using ScheduleApi.Exceptions;
+using ScheduleApi.Models;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ScheduleApi.Utils {
     public static class ScheduleUtils {
 
-        public static Dictionary<string, int> Days = new Dictionary<string, int> {
+        public enum ConditionTypes {
+            EMPLOYEE, DAY, SHIFT, HOURS
+        }
+
+        public static readonly Dictionary<string, int> Days = new() {
             { "monday", 0 },
             { "tuesday", 1 },
             { "wednesday", 2 },
             { "thursday", 3 },
             { "friday", 4 },
             { "saturday", 5 },
-            { "sunday", 6}
+            { "sunday", 6},
+            { "all", 7 },
         };
 
-        public static Dictionary<string, Func<Schedule, Condition, bool>> methodMap =
-            new Dictionary<string, Func<Schedule, Condition, bool>>() {
-                { "day", (s, c) => DayValid(s, c) },
-                { "employee", (s, c) => EmployeeValid(s, c) }
+        public static readonly Dictionary<int, string> ReverseDays = Days.ToDictionary(x => x.Value, x => x.Key);
+
+        public delegate bool OperatorFunc(double hours, int comp, out double remain);
+
+        public static readonly Dictionary<string, OperatorFunc> operatorMap =
+            new() {
+                { "=", delegate(double hours, int comp, out double remain) {
+                    remain = comp - hours;
+                    return hours == comp;
+                }},
+                { ">", delegate (double hours, int comp, out double remain) {
+                    remain = int.MaxValue;
+                    return hours >= comp;
+                }},
+                { "<", delegate(double hours, int comp, out double remain) {
+                    remain = comp - hours;
+                    return hours <= comp;
+                }},
         };
 
-        private static bool DayValid(Schedule s, Condition c) {
-            Console.WriteLine("DayValid?");
-            //Console.WriteLine("Day: " + c.Name);
-            //Console.WriteLine(s.Day + " == " + Days[c.Name.ToLower()]);
-            //Console.WriteLine(s.Day == Days[c.Name.ToLower()]);
-            bool not = c.Operator != null && c.Operator.Equals("not");
-            bool valid = s.Day == Days[c.Name];
-            return not ? !valid : valid;
+    }
+
+    public struct TimeRange : IEquatable<TimeRange> {
+        public string Start;
+        public string End;
+
+        public bool Equals(TimeRange other) {
+            return Start.Equals(other.Start) && End.Equals(other.End);
         }
 
-        private static bool EmployeeValid(Schedule s, Condition c) {
-            Console.WriteLine("EmployeeValid");
-            //Console.WriteLine("employeeId: " + c.Name);
-            bool not = c.Operator != null && c.Operator.Equals("not");
-            bool valid = s.EmployeeId == c.Value;
-            return not ? !valid : valid;
+        public override string ToString() {
+            return Start + ", " + End;
+        }
+    }
+
+    public struct EmployeeDay : IEqualityComparer<EmployeeDay> {
+        public int Day;
+        public int EmployeeId;
+
+        public EmployeeDay(int employeeId, int day) {
+            Day = day;
+            EmployeeId = employeeId;
+        }
+
+        public bool Equals(EmployeeDay x, EmployeeDay y) {
+            return x.Day == y.Day && x.EmployeeId == y.EmployeeId;
+        }
+
+        public int GetHashCode([DisallowNull] EmployeeDay obj) {
+            return HashCode.Combine(obj.Day, obj.EmployeeId);
         }
     }
 }

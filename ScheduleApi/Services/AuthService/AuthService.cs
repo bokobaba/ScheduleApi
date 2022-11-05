@@ -165,7 +165,7 @@ namespace ScheduleApi.Services.AuthService {
             var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512);
 
-            List<Claim> claims = new List<Claim> {
+            List<Claim> claims = new() {
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()),
                 new Claim(ClaimTypes.Email, user.EmailAddress),
@@ -187,7 +187,7 @@ namespace ScheduleApi.Services.AuthService {
         }
 
         private JwtSecurityToken GetJwtToken(string expiredToken) {
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler tokenHandler = new();
             return tokenHandler.ReadJwtToken(expiredToken);
         }
     }

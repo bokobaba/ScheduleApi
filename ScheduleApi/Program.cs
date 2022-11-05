@@ -20,6 +20,9 @@ using System.Reflection.Metadata.Ecma335;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//builder.Logging.AddDebug();
+//builder.Logging.AddConsole();
+
 //set up azure app configuration
 builder.Configuration.AddAzureAppConfiguration(options => {
     options.Connect(builder.Configuration.GetConnectionString("AppConfig"))

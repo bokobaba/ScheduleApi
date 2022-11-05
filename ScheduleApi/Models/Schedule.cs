@@ -18,13 +18,5 @@ namespace ScheduleApi.Models {
         public string UserId { get; set; }
         public int EmployeeId { get; set; }
         public Employee Employee { get; set; }
-
-        public override string ToString() {
-            return "Schedule" + "\n" +
-                   "    Year: " + Year + "\n" +
-                   "    Week: " + Week + "\n" +
-                   "    Day: " + Day + "\n" +
-                   "    EmployeeId: " + EmployeeId + "\n";
-        }
     }
 }

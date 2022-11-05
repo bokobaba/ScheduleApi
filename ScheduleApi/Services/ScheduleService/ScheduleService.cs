@@ -11,14 +11,17 @@ using AutoMapper.Execution;
 
 namespace ScheduleApi.Services.ScheduleService {
     public class ScheduleService : IScheduleService {
-        private ScheduleDbContext _context;
-        private IHttpContextAccessor _contextAccessor;
-        private IMapper _mapper;
+        private readonly ScheduleDbContext _context;
+        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
-        public ScheduleService(ScheduleDbContext context, IHttpContextAccessor contextAccessor, IMapper mapper) {
+        public ScheduleService(ScheduleDbContext context, IHttpContextAccessor contextAccessor, 
+            IMapper mapper, ILogger<ScheduleService> logger) {
             _context = context;
             _contextAccessor = contextAccessor;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<GetScheduleDto> AddSchedule(AddScheduleDto scheduleToAdd) {
@@ -132,7 +135,7 @@ namespace ScheduleApi.Services.ScheduleService {
         }
 
         public async Task<IEnumerable<GetScheduleDto>> SaveWeeklySchedule(SaveWeeklyScheduleDto request) {
-            List<GetScheduleDto> updated = new List<GetScheduleDto>();
+            List<GetScheduleDto> updated = new();
 
             if (request.Schedules == null || request.Schedules.Count < 1)
                 return updated;
@@ -203,7 +206,7 @@ namespace ScheduleApi.Services.ScheduleService {
             return _mapper.Map<GetScheduleDto>(schedule);
         }
 
-        public async Task<List<GetScheduleDto>> GenerateSchedule(GenerateScheduleDto request) {
+        public async Task<IEnumerable<GetScheduleDto>> GenerateScheduleFromRules(GenerateScheduleDto request) {
             string userId = GetUserId(_contextAccessor);
 
             List<RuleGroup> rules = await _context.RuleGroups
@@ -216,158 +219,152 @@ namespace ScheduleApi.Services.ScheduleService {
                 .ToListAsync();
             List<Employee> employees = await _context.Employees
                 .AsNoTrackingWithIdentityResolution()
+                .AsSingleQuery()
                 .Where(e => e.UserId == userId)
                 .Include(e => e.Requests).Include(e => e.Availability)
                 .ToListAsync();
 
-            return GenerateScheduleRecursive(request, rules, shifts, employees);
+            List<Schedule> schedules = GenerateSchedules(rules, shifts, employees);
+            schedules.ForEach(s => {
+                s.UserId = userId;
+                s.Year = request.Year;
+                s.Week = request.Week;
+            });
+
+            return schedules.Select(s => _mapper.Map<GetScheduleDto>(s));
         }
 
-        private string ScheduleNotFoundMessage(Object data) {
+        private static string ScheduleNotFoundMessage(Object data) {
             return string.Format("schedule not found matching {0}", data.ToString());
         }
 
-        private List<GetScheduleDto> GenerateScheduleRecursive(GenerateScheduleDto request,
-            List<RuleGroup> ruleGroups, List<Shift> shifts, List<Employee> employees) {
-            List<Rule> rules = ruleGroups.Select(r => parseRule(r, employees, shifts)).ToList();
+        private List<Schedule> GenerateSchedules(List<RuleGroup> ruleGroups, 
+            List<Shift> shifts, List<Employee> employees) {
+            List<Rule> rules = ruleGroups.Select(r => ParseRule(r, employees, shifts)).ToList();
             rules.Sort((a, b) => a.Priority - b.Priority);
             //rules.ForEach(r => Console.WriteLine(r));
 
-            List<Schedule> schedules = GenerateIntialSchedule(request, employees);
-            Console.WriteLine("schedules: " + schedules.Count);
+            ScheduleRequirements reqs = new ScheduleRequirements(rules);
+            List<Schedule> schedules = reqs.GenerateSchedule(employees);
 
-            rules.ForEach(rule => rule.Valid(schedules));
-
-            return new List<GetScheduleDto>();
+            return schedules;
         }
 
         // rules separated by ; operator separated by , type separated by :
-        private Rule parseRule(RuleGroup ruleGroup, List<Employee> employees, List<Shift> shifts) {
-            Rule result = new Rule() { Priority = ruleGroup.Priority, Status = ruleGroup.Status};
+        private static Rule ParseRule(RuleGroup ruleGroup, List<Employee> employees, List<Shift> shifts) {
+            Rule result = new() { Priority = ruleGroup.Priority, Status = ruleGroup.Status };
 
-            Console.WriteLine(ruleGroup.Rules);
-            List<Condition> conditions = new List<Condition>();
             string[] rules = ruleGroup.Rules.Split(";");
             if (rules.Length == 0) return result;
 
             foreach (string rule in rules) {
-                Console.WriteLine("rule: " + rule);
+                if (rule == null || rule.Equals(""))
+                    continue;
+
                 string[] properties = rule.Split(":");
+
                 if (properties.Length < 2)
                     throw new AppException("incorrectly formatted rule");
+
                 string[] description = properties[1].Split(",");
                 if (description.Length < 1)
                     throw new AppException("incorrectly formatted rule");
 
                 string type = properties[0].ToLower();
-                Console.WriteLine("type: " + type);
 
-                switch(type) {
+                switch (type) {
                     case "hours":
-                        conditions.Add(ParseHours(description));
+                        result.Hours = ParseHours(description);
                         break;
                     case "employee":
-                        conditions.Add(ParseEmployee(description));
+                        result.Employees.AddRange(ParseEmployee(description, employees));
                         break;
                     case "day":
-                        conditions.Add(ParseDay(description));
+                        result.Days.Add(ParseDay(description));
                         break;
                     case "shift":
                         Condition? c = ParseShift(description, shifts);
                         if (c != null)
-                            conditions.Add(c);
+                            result.Shift = c;
                         break;
                     default:
                         throw new AppException("invalid identifier: " + type);
                 }
             }
 
-            result.Conditions = conditions;
-
             return result;
         }
 
-        private Condition ParseHours(string[] description) {
-            int number;
-            if (description.Length != 2 || !int.TryParse(description[1], out number))
+        private static Condition ParseHours(string[] description) {
+            if (description.Length != 2 || !int.TryParse(description[1], out _))
                 throw new AppException("incorrectly formatted rule");
 
             return new Condition() {
                 Name = "hours",
-                Type = "hours",
+                Type = ConditionTypes.HOURS,
                 Operator = description[0].ToLower(),
                 Value = int.Parse(description[1]),
             };
         }
 
-        private Condition? ParseShift(string[] description, List<Shift> shifts) {
-            int id;
-            if (description.Length != 1 || !int.TryParse(description[0], out id))
+        private static Condition? ParseShift(string[] description, List<Shift> shifts) {
+            if (description.Length != 1 || !int.TryParse(description[0], out int id))
                 throw new AppException("incorrectly formatted rule");
             Shift? s = shifts.Find(s => s.ID == id);
             if (s == null)
                 return null;
 
-            var result = new Condition() {
+            return new Condition() {
                 Name = "shift",
-                Type = "shift",
+                Type = ConditionTypes.SHIFT,
                 Value = id,
                 Shift = new TimeRange() {
                     Start = s.Start,
                     End = s.End
                 }
             };
-            Console.WriteLine(result);
-            return result;
         }
 
-        private Condition ParseEmployee(string[] description) {
+        private static List<Condition> ParseEmployee(string[] description, List<Employee> employees) {
             bool opPresent = description.Length > 1;
-            int value;
-            string name = opPresent ? description[1] : description[0];
+            string name = opPresent ? description[1].ToLower() : description[0].ToLower();
             string? op = opPresent ? description[0].ToLower() : null;
 
+            if (name.Equals("all")) {
+                List<Condition> conditions = new();
+                employees.ForEach(e => {
+                    conditions.Add(new Condition() {
+                        Name = name,
+                        Type = ConditionTypes.EMPLOYEE,
+                        Operator = op,
+                        Value = e.EmployeeId
+                    });
+                });
+                return conditions;
+            }
             string str = opPresent ? description[1] : description[0];
-            if (!int.TryParse(str, out value))
+            if (!int.TryParse(str, out int value))
                 throw new AppException("incorrectly formatted rule");
 
-            return new Condition() {
-                Name = name.ToLower(),
-                Type = "employee",
-                Operator = op,
-                Value = value
-            };
+            return new List<Condition>() {
+                new Condition() {
+                    Name = name,
+                    Type = ConditionTypes.EMPLOYEE,
+                    Operator = op,
+                    Value = value
+            }};
         }
 
-        private Condition ParseDay(string[] description) {
+        private static Condition ParseDay(string[] description) {
             bool opPresent = description.Length > 1;
             string name = opPresent ? description[1] : description[0];
             string? op = opPresent ? description[0].ToLower() : null;
 
             return new Condition() {
                 Name = name.ToLower(),
-                Type = "day",
+                Type = ConditionTypes.DAY,
                 Operator = op
             };
-        }
-
-        private List<Schedule> GenerateIntialSchedule(GenerateScheduleDto request,
-            List<Employee> employees) {
-            List<Schedule> schedules = new List<Schedule>();
-            employees.ForEach(e => {
-                for (int i = 0; i < 5; ++i) {
-                    schedules.Add(new Schedule() {
-                        UserId = GetUserId(_contextAccessor),
-                        EmployeeId = e.EmployeeId,
-                        Year = request.Year,
-                        Week = request.Week,
-                        Day = i,
-                        Start = "09:00",
-                        End = "17:00",
-                    });
-                }
-            });
-            return schedules;
         }
     }
 }

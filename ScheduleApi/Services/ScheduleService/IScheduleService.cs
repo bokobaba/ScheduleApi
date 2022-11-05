@@ -12,6 +12,6 @@ namespace ScheduleApi.Services.ScheduleService {
         public Task<GetScheduleDto> UpdateSchedule(UpdateScheduleDto updatedSchedule);
         public Task<IEnumerable<GetScheduleDto>> SaveWeeklySchedule(SaveWeeklyScheduleDto request);
         public Task DeleteSchedule(EmployeeDayScheduleDto request);
-        public Task<List<GetScheduleDto>> GenerateSchedule(GenerateScheduleDto request);
+        public Task<IEnumerable<GetScheduleDto>> GenerateScheduleFromRules(GenerateScheduleDto request);
     }
 }

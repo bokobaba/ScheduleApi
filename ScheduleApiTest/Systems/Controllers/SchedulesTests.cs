@@ -6,22 +6,18 @@ using ScheduleApiTest.Fixtures;
 using ScheduleApiTest.Helpers;
 using System.Net;
 using System.Net.Http.Json;
-using System.Security.Policy;
-using Xunit.Abstractions;
 
 namespace ScheduleApiTest.Systems.Controllers {
     [Collection("ScheduleApi")]
     public class SchedulesTests : IClassFixture<CustomWebApplicationFactory<Program>> {
         private readonly CustomWebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
-        private readonly ITestOutputHelper _output;
 
-        public SchedulesTests(CustomWebApplicationFactory<Program> factory, ITestOutputHelper output) {
+        public SchedulesTests(CustomWebApplicationFactory<Program> factory) {
             _factory = factory;
             _client = _factory.CreateClient();
-            _output = output;
 
-            Utilities.SetClientToken(_client, _factory.config);
+            Utilities.SetClientToken(_client);
         }
 
         [Fact]
@@ -337,7 +333,6 @@ namespace ScheduleApiTest.Systems.Controllers {
         [Fact]
         public async Task Schedules_Generate_Schedules_ReturnSuccess() {
             //Arrange
-            Console.SetOut(new ConsoleWriter(_output));
             string url = "/api/Schedules/GenerateSchedules";
 
             var request1 = new GenerateScheduleDto() {
@@ -355,17 +350,6 @@ namespace ScheduleApiTest.Systems.Controllers {
 
             //Assert
             response.EnsureSuccessStatusCode();
-        }
-
-        private class ConsoleWriter : StringWriter {
-            private ITestOutputHelper output;
-            public ConsoleWriter(ITestOutputHelper output) {
-                this.output = output;
-            }
-
-            public override void WriteLine(string m) {
-                output.WriteLine(m);
-            }
         }
     }
 }

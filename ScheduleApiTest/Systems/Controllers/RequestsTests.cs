@@ -1,15 +1,10 @@
 ﻿using FluentAssertions;
 using Newtonsoft.Json;
-using RestSharp;
-using ScheduleApi.Dtos.EmployeeDtos;
 using ScheduleApi.Dtos.RequestDtos;
 using ScheduleApi.Models;
 using ScheduleApiTest.Fixtures;
 using ScheduleApiTest.Helpers;
-using ScheduleApiTest.Models;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace ScheduleApiTest.Systems.Controllers {
@@ -22,7 +17,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             _factory = factory;
             _client = _factory.CreateClient();
 
-            Utilities.SetClientToken(_client, _factory.config);
+            Utilities.SetClientToken(_client);
         }
 
         [Fact]
@@ -140,9 +135,9 @@ namespace ScheduleApiTest.Systems.Controllers {
             var response3 = await _client.PostAsJsonAsync(url, request3); //test invalid user
 
             //Assert
-            response1.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            response1.StatusCode.Should().Be(HttpStatusCode.BadRequest);
             response2.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            response3.StatusCode.Should().Be(HttpStatusCode.NotFound);
+            response3.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
         [Fact]

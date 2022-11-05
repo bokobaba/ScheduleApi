@@ -14,7 +14,6 @@ namespace ScheduleApiTest.Fixtures {
     public class CustomWebApplicationFactory<Program>
     : WebApplicationFactory<Program> where Program : class {
         public static bool init = false;
-        public IConfigurationRoot config;
 
         protected override void ConfigureWebHost(IWebHostBuilder builder) {
             if (init) return;
@@ -29,9 +28,10 @@ namespace ScheduleApiTest.Fixtures {
                 IConfigurationRoot configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.Development.json")
                 .AddEnvironmentVariables()
+                .AddUserSecrets<Program>()
                 .Build();
 
-                config = configuration;
+                Utilities.config = configuration;
 
                 services.AddDbContext<ScheduleDbContext>(options => {
                     options.UseSqlServer(configuration.GetConnectionString("dbConnection"));
