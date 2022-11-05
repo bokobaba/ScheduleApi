@@ -44,7 +44,6 @@ namespace ScheduleApi.Services.EmployeeService {
                 .Where(e => e.UserId == userId)
                 .Include(e => e.Requests)
                 .Include(e => e.Availability)
-                .Include(e => e.Schedules)
                 .ToListAsync();
 
             return employees.Select(e => _mapper.Map<GetEmployeeInfoDto>(e)).ToList();
@@ -57,7 +56,6 @@ namespace ScheduleApi.Services.EmployeeService {
                 .AsNoTrackingWithIdentityResolution()
                 .Include(e => e.Requests)
                 .Include(e => e.Availability)
-                .Include(e => e.Schedules)
                 .FirstOrDefaultAsync(e => e.UserId == userId && e.EmployeeId == id);
 
             if (employee == null) {
