@@ -12,7 +12,6 @@ namespace ScheduleApi {
         public AutoMapperProfile() {
             CreateMap<Employee, GetEmployeeDto>();
             CreateMap<Employee, GetEmployeeInfoDto>()
-                .ForMember(e => e.Schedule, c => c.MapFrom(m => m.Schedules))
                 .ForMember(e => e.Requests, c => c.MapFrom(m => m.Requests))
                 .ForMember(e => e.Availability, c => c.MapFrom(m => m.Availability));
             CreateMap<AddEmployeeDto, Employee>();
