@@ -18,7 +18,7 @@ namespace ScheduleApi.Utils {
         public ScheduleRequirements(List<Rule> rules) {
             _schedules = new();
 
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 1; i < 8; ++i) {
                 _schedules.Add(new RequirementsDay() { Day = i });
             }
             rules.ForEach(r => {
@@ -73,12 +73,13 @@ namespace ScheduleApi.Utils {
         }
 
         private static bool DayValid(RequirementsDay d, List<Condition> days, Condition? employee) {
+            Debug.WriteLine("day valid");
             bool valid = true;
             int day = d.Day;
             foreach (Condition c in days) {
                 bool not = c.Operator != null && c.Operator.Equals("not");
                 int conditionDay = Days[c.Name];
-                bool equal = day == conditionDay || conditionDay == 7;
+                bool equal = day == conditionDay || conditionDay == Days["all"];
 
                 // not day for employee rule found so exclude employee from this day
                 if (equal && employee != null && not && !d.RequiredEmployees.Contains(employee.Value)) {
@@ -436,7 +437,7 @@ namespace ScheduleApi.Utils {
             public HashSet<int> RequiredEmployees = new();
             public Dictionary<int, TimeRange> Shifts = new();
             public HashSet<TimeRange> RequiredShifts = new();
-            public override string ToString() {
+            public override string ToString() { 
                 string str = "GenScheduleDay\n";
                 str += "   Day: " + ReverseDays[Day] + "\n";
                 str += "   requiredEmployees: ";

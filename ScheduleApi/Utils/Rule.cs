@@ -85,7 +85,7 @@ namespace ScheduleApi.Utils {
 
         private static List<Condition> ParseEmployee(string[] description, List<Employee> employees) {
             bool opPresent = description.Length > 1;
-            string name = opPresent ? description[1].ToLower() : description[0].ToLower();
+            string name = opPresent ? description[1].Trim().ToLower() : description[0].Trim().ToLower();
             string? op = opPresent ? description[0].ToLower() : null;
 
             if (name.Equals("all")) {
@@ -100,8 +100,7 @@ namespace ScheduleApi.Utils {
                 });
                 return conditions;
             }
-            string str = opPresent ? description[1] : description[0];
-            if (!int.TryParse(str, out int value))
+            if (!int.TryParse(name, out int value))
                 throw new AppException("incorrectly formatted rule");
 
             return new List<Condition>() {
@@ -116,10 +115,10 @@ namespace ScheduleApi.Utils {
         private static Condition ParseDay(string[] description) {
             bool opPresent = description.Length > 1;
             string name = opPresent ? description[1] : description[0];
-            string? op = opPresent ? description[0].ToLower() : null;
+            string? op = opPresent ? description[0].Trim().ToLower() : null;
 
             return new Condition() {
-                Name = name.ToLower(),
+                Name = name.Trim().ToLower(),
                 Type = ConditionTypes.DAY,
                 Operator = op
             };

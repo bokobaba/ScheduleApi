@@ -236,24 +236,24 @@ namespace ScheduleApiTest.Helpers {
                 Status = true,
                 Rules = "Employee:6439174;day:not,wednesday;day:not,thursday;hours:<,40"
             },
-            //new RuleGroup() {
-            //    Name = "Rule: Test",
-            //    Priority = 1,
-            //    Status = true,
-            //    Rules = "Employee:1234567;Employee:not,6439174;Shift:2"
-            //},
-            //new RuleGroup() {
-            //    Name = "Rule: Test",
-            //    Priority = 2,
-            //    Status = true,
-            //    Rules = "day:not,Wednesday;day:not,Thursday;Employee:6439174;shift:1;hours:<,40"
-            //},
-            //new RuleGroup() {
-            //    Name = "Rule: Test",
-            //    Priority = 3,
-            //    Status = true,
-            //    Rules = "Day:All;Shift:1;"
-            //},
+            new RuleGroup() {
+                Name = "Rule: Test",
+                Priority = 1,
+                Status = true,
+                Rules = "day:all;shift:1"
+            },
+            new RuleGroup() {
+                Name = "Rule: Test",
+                Priority = 2,
+                Status = true,
+                Rules = "day:all;shift:2"
+            },
+            new RuleGroup() {
+                Name = "Rule: Test",
+                Priority = 3,
+                Status = true,
+                Rules = "employee:all;hours:<,40;"
+            },
             //new RuleGroup() {
             //    Name = "Rule: Test",
             //    Priority = 4,

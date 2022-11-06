@@ -11,14 +11,14 @@ namespace ScheduleApi.Utils {
         }
 
         public static readonly Dictionary<string, int> Days = new() {
-            { "monday", 0 },
-            { "tuesday", 1 },
-            { "wednesday", 2 },
-            { "thursday", 3 },
-            { "friday", 4 },
-            { "saturday", 5 },
-            { "sunday", 6},
-            { "all", 7 },
+            { "monday", 1 },
+            { "tuesday", 2 },
+            { "wednesday", 3 },
+            { "thursday", 4 },
+            { "friday", 5 },
+            { "saturday", 6 },
+            { "sunday", 7},
+            { "all", 8 },
         };
 
         public static readonly Dictionary<int, string> ReverseDays = Days.ToDictionary(x => x.Value, x => x.Key);
