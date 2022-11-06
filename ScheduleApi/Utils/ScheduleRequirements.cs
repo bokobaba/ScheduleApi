@@ -124,7 +124,10 @@ namespace ScheduleApi.Utils {
 
             if (c.Operator == null)
                 return true;
-            bool comp = operatorMap[c.Operator](hours, c.Value, out remain);
+            operatorMap.TryGetValue(c.Operator, out OperatorFunc? operation);
+            if (operation == null)
+                return true;
+            bool comp = operation(hours, c.Value, out remain);
 
             remain = c.Operator.Equals(">") ? int.MaxValue : c.Value - hours;
             return comp;
@@ -319,6 +322,7 @@ namespace ScheduleApi.Utils {
                 if (remain <= 0)
                     continue;
 
+                Debug.WriteLine("finding shifts for employee: " + e.EmployeeId);
                 FindShifts(e.EmployeeId, schedules, remain);
             }
         }

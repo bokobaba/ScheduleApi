@@ -234,44 +234,44 @@ namespace ScheduleApiTest.Helpers {
                 Name = "Rule: Test",
                 Priority = 0,
                 Status = true,
-                Rules = "Employee:all;hours:<,40"
+                Rules = "Employee:6439174;day:not,wednesday;day:not,thursday;hours:<,40"
             },
-            new RuleGroup() {
-                Name = "Rule: Test",
-                Priority = 1,
-                Status = true,
-                Rules = "Employee:1234567;Employee:not,6439174;Shift:2"
-            },
-            new RuleGroup() {
-                Name = "Rule: Test",
-                Priority = 2,
-                Status = true,
-                Rules = "day:not,Wednesday;day:not,Thursday;Employee:6439174;shift:1;hours:<,40"
-            },
-            new RuleGroup() {
-                Name = "Rule: Test",
-                Priority = 3,
-                Status = true,
-                Rules = "Day:All;Shift:1;"
-            },
-            new RuleGroup() {
-                Name = "Rule: Test",
-                Priority = 4,
-                Status = true,
-                Rules = "Day:All;Shift:2;"
-            },
-            new RuleGroup() {
-                Name = "Rule: Test",
-                Priority = 5,
-                Status = true,
-                Rules = "day:wednesday;employee:6439174"
-            },
-            new RuleGroup() {
-                Name = "Rule: Test",
-                Priority = 6,
-                Status = true,
-                Rules = "Day:Tuesday;Employee:6439174;Employee:1234567;Shift:1"
-            },
+            //new RuleGroup() {
+            //    Name = "Rule: Test",
+            //    Priority = 1,
+            //    Status = true,
+            //    Rules = "Employee:1234567;Employee:not,6439174;Shift:2"
+            //},
+            //new RuleGroup() {
+            //    Name = "Rule: Test",
+            //    Priority = 2,
+            //    Status = true,
+            //    Rules = "day:not,Wednesday;day:not,Thursday;Employee:6439174;shift:1;hours:<,40"
+            //},
+            //new RuleGroup() {
+            //    Name = "Rule: Test",
+            //    Priority = 3,
+            //    Status = true,
+            //    Rules = "Day:All;Shift:1;"
+            //},
+            //new RuleGroup() {
+            //    Name = "Rule: Test",
+            //    Priority = 4,
+            //    Status = true,
+            //    Rules = "Day:All;Shift:2;"
+            //},
+            //new RuleGroup() {
+            //    Name = "Rule: Test",
+            //    Priority = 5,
+            //    Status = true,
+            //    Rules = "day:wednesday;employee:6439174"
+            //},
+            //new RuleGroup() {
+            //    Name = "Rule: Test",
+            //    Priority = 6,
+            //    Status = true,
+            //    Rules = "Day:Tuesday;Employee:6439174;Employee:1234567;Shift:1"
+            //},
         };
 
         public static void InitializeDbForTests(ScheduleDbContext db) {
