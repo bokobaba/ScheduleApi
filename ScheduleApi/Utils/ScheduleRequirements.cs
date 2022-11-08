@@ -204,8 +204,12 @@ namespace ScheduleApi.Utils {
 
                         schedules.Add(key, schedule);
                         Debug.WriteLine("adding schedule: " + key.EmployeeId + ", " + ReverseDays[dayReq.Day]);
-
                         _totalHours[key.EmployeeId] = hours;
+
+                        // if this coincides with a required shift count it as filled
+                        if (dayReq.RequiredShifts.TryGetValue(shift.Value, out int count)) {
+                            dayReq.RequiredShifts[shift.Value] = count - 1;
+                        }
                     }
                 }
             });
@@ -246,6 +250,7 @@ namespace ScheduleApi.Utils {
                                 schedule.Start = reqShift.Key.Start;
                                 schedule.End = reqShift.Key.End;
                                 dayReq.RequiredShifts[reqShift.Key] = reqShift.Value - 1;
+                                Debug.WriteLine("reqShift: " + reqShift);
 
                                 double hours = _totalHours[key.EmployeeId] + GetHours(reqShift.Key);
                                 _totalHours[key.EmployeeId] = hours;
@@ -264,21 +269,22 @@ namespace ScheduleApi.Utils {
             Dictionary<EmployeeDay, Schedule> schedules) {
             Dictionary<int, List<TimeRange>> unassignedReqShifts = new();
 
-            int index = 0;
             foreach (RequirementsDay dayReq in _dayRequirements) {
                 if (dayReq.RequiredShifts.Count < 0)
                     continue;
 
-                unassignedReqShifts.Add(index, new());
+                foreach (Employee e in employees) {
+                    if (dayReq.ExcludedEmployees.Contains(e.EmployeeId)) {
+                        continue;
+                    }
 
-                foreach (KeyValuePair<TimeRange, int> reqShift in dayReq.RequiredShifts) {
+                    foreach (KeyValuePair<TimeRange, int> reqShift in dayReq.RequiredShifts) {
                     if (reqShift.Value <= 0)
                         continue;
 
                     for (int i = 0; i < reqShift.Value; ++i) {
-                        Debug.WriteLine("reqShift: " + ReverseDays[dayReq.Day] + ", " + reqShift.Key);
-                        bool assigned = false;
-                        foreach (Employee e in employees) {
+                        Debug.WriteLine("");
+                        Debug.WriteLine("reqShift: " + ReverseDays[dayReq.Day] + ", " + reqShift);
                             double hours = _totalHours[e.EmployeeId] + GetHours(reqShift.Key);
                             HoursQuotaMet(hours, e.EmployeeId, out double remain);
                             if (remain < 0) {
@@ -312,6 +318,7 @@ namespace ScheduleApi.Utils {
                             schedule.Start = reqShift.Key.Start;
                             schedule.End = reqShift.Key.End;
                             dayReq.RequiredShifts[reqShift.Key] = reqShift.Value - 1;
+                            Debug.WriteLine("reqShift: " + reqShift);
                             _totalHours[key.EmployeeId] = hours;
 
                             if (add) {
@@ -320,12 +327,10 @@ namespace ScheduleApi.Utils {
                                 schedules.Add(key, schedule);
                             }
 
-                            assigned = true;
                             break;
                         }
                     }
                 }
-                ++index;
             }
         }
 
@@ -357,8 +362,10 @@ namespace ScheduleApi.Utils {
                     continue;
 
                 // employee excluded from this day
-                if (reqDay.ExcludedEmployees.Contains(key.EmployeeId))
+                if (reqDay.ExcludedEmployees.Contains(key.EmployeeId)) {
+                    Debug.WriteLine(employee + " cannot work on " + reqDay.Day);
                     continue;
+                }
 
                 // find a shift in required shifts for this day
                 foreach (KeyValuePair<TimeRange, int> reqShift in reqDay.RequiredShifts) {
@@ -486,7 +493,7 @@ namespace ScheduleApi.Utils {
                     str += "[" + item.Key + ", " + item.Value.Start + ", " + item.Value.End + "], ";
                 }
                 str += "\n   requiredShifts: ";
-                foreach (TimeRange s in RequiredShifts.Keys) { str += "[" + s.Start + ", " + s.End + "], "; };
+                foreach (KeyValuePair<TimeRange, int> s in RequiredShifts) { str += "[" + s + "],";  };
 
                 return str;
             }

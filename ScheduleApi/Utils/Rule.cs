@@ -131,7 +131,7 @@ namespace ScheduleApi.Utils {
                          "Conditions:\n";
             Days.ForEach(r => str += r.ToString());
             Employees.ForEach(r => str += r.ToString());
-            str += Shifts == null ? "" : Shifts.ToString();
+            Shifts.ForEach(s => str += (s.ToString() + ", "));
             str += Hours == null ? "" : Hours.ToString();
 
             return str;
