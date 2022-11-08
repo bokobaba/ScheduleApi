@@ -9,7 +9,7 @@ namespace ScheduleApi.Utils {
         public bool Status { get; set; }
         public List<Condition> Days = new();
         public List<Condition> Employees = new();
-        public Condition Shift { get; set; }
+        public List<Condition> Shifts = new();
         public Condition Hours { get; set; }
 
         public Rule(RuleGroup ruleGroup, List<Employee> employees, List<Shift> shifts) {
@@ -45,7 +45,7 @@ namespace ScheduleApi.Utils {
                     case "shift":
                         Condition? c = ParseShift(description, shifts);
                         if (c != null)
-                            Shift = c;
+                            Shifts.Add(c);
                         break;
                     default:
                         throw new AppException("invalid identifier: " + type);
@@ -131,7 +131,7 @@ namespace ScheduleApi.Utils {
                          "Conditions:\n";
             Days.ForEach(r => str += r.ToString());
             Employees.ForEach(r => str += r.ToString());
-            str += Shift == null ? "" : Shift.ToString();
+            str += Shifts == null ? "" : Shifts.ToString();
             str += Hours == null ? "" : Hours.ToString();
 
             return str;

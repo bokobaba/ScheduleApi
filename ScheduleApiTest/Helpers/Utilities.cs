@@ -228,7 +228,7 @@ namespace ScheduleApiTest.Helpers {
                 Priority = 2,
                 Status = true,
                 UserId = "invalid user",
-                Rules = "Day:Monday;Employee:1234567"
+                Rules = "Day:not,Monday;day:not,sunday;Employee:1234567"
             },
             new RuleGroup() {
                 Name = "Rule: Test",
@@ -240,26 +240,26 @@ namespace ScheduleApiTest.Helpers {
                 Name = "Rule: Test",
                 Priority = 1,
                 Status = true,
-                Rules = "day:all;shift:1"
+                Rules = "day:all;shift:1;shift:2;shift:2"
             },
-            new RuleGroup() {
-                Name = "Rule: Test",
-                Priority = 2,
-                Status = true,
-                Rules = "day:all;shift:2"
-            },
+            //new RuleGroup() {
+            //    Name = "Rule: Test",
+            //    Priority = 2,
+            //    Status = true,
+            //    Rules = "day:all;shift:2"
+            //},
             new RuleGroup() {
                 Name = "Rule: Test",
                 Priority = 3,
                 Status = true,
                 Rules = "employee:all;hours:<,40;"
             },
-            //new RuleGroup() {
-            //    Name = "Rule: Test",
-            //    Priority = 4,
-            //    Status = true,
-            //    Rules = "Day:All;Shift:2;"
-            //},
+            new RuleGroup() {
+                Name = "Rule: Test",
+                Priority = 4,
+                Status = true,
+                Rules = "Day:not,Monday;day:not,sunday;Employee:1234567"
+            },
             //new RuleGroup() {
             //    Name = "Rule: Test",
             //    Priority = 5,

@@ -9,17 +9,17 @@ namespace ScheduleApi.Utils {
 
     public class ScheduleRequirements {
         private readonly Dictionary<int, Condition> _employeeHours = new();
-        private readonly List<RequirementsDay> _schedules = new();
+        private readonly List<RequirementsDay> _dayRequirements = new();
         private readonly Dictionary<int, TimeRange> _excludedEmployeeShifts = new();
         private readonly Dictionary<int, TimeRange> _requiredEmployeeShifts = new();
         private readonly Dictionary<int, double> _totalHours = new();
         private readonly ILogger _logger;
 
         public ScheduleRequirements(List<Rule> rules) {
-            _schedules = new();
+            _dayRequirements = new();
 
             for (int i = 1; i < 8; ++i) {
-                _schedules.Add(new RequirementsDay() { Day = i });
+                _dayRequirements.Add(new RequirementsDay() { Day = i });
             }
             rules.ForEach(r => {
                 //Debug.WriteLine("------------------------------------------------------------------------");
@@ -40,22 +40,22 @@ namespace ScheduleApi.Utils {
 
                         // add employee to each day present, add shift if present
                         if (r.Days.Count > 0) {
-                            GetValidSchedules(r, e);
+                            GetDayRequirements(r, e);
 
                             // if no days are present, just add required shifts to schedule
                         } else {
-                            if (r.Shift != null) {
+                            if (r.Shifts.Count > 0) { // only one shift condition if employee is present
                                 // rule implies to exclude employee from shift
                                 if (e.Operator != null && e.Operator.Equals("not")) {
                                     if (!_excludedEmployeeShifts.ContainsKey(e.Value)) {
                                         Debug.WriteLine("adding excludedEmployeeShift to GenSchedule");
-                                        _excludedEmployeeShifts.Add(e.Value, r.Shift.Shift);
+                                        _excludedEmployeeShifts.Add(e.Value, r.Shifts[0].Shift);
                                     }
                                     //rule implies to require shift for employee
                                 } else {
                                     if (!_requiredEmployeeShifts.ContainsKey(e.Value)) {
                                         Debug.WriteLine("adding requiredEmployeeShift to GenSchedule");
-                                        _requiredEmployeeShifts.Add(e.Value, r.Shift.Shift);
+                                        _requiredEmployeeShifts.Add(e.Value, r.Shifts[0].Shift);
                                     }
                                 }
                             }
@@ -65,14 +65,14 @@ namespace ScheduleApi.Utils {
                     // no Employees present, so only add day requirements
                 } else if (r.Days.Count > 0) {
                     Debug.WriteLine("no employees found");
-                    GetValidSchedules(r, null);
+                    GetDayRequirements(r, null);
                 }
             });
 
             Debug.WriteLine(this);
         }
 
-        private static bool DayValid(RequirementsDay d, List<Condition> days, Condition? employee) {
+        private static bool DayMatch(RequirementsDay d, List<Condition> days, Condition? employee) {
             Debug.WriteLine("day valid");
             bool valid = true;
             int day = d.Day;
@@ -94,23 +94,31 @@ namespace ScheduleApi.Utils {
             return valid;
         }
 
-        private void GetValidSchedules(Rule r, Condition? e) {
-            _schedules.ForEach(d => {
+        private void GetDayRequirements(Rule r, Condition? e) {
+            _dayRequirements.ForEach(d => {
                 // not employee for day rule found so exclude employee from this day
                 if (e != null && e.Operator != null && e.Operator.Equals("not"))
                     d.ExcludedEmployees.Add(e.Value);
 
-                bool valid = DayValid(d, r.Days, e);
+                bool match = DayMatch(d, r.Days, e);
 
-                if (valid) {
-                    if (r.Shift != null) {
+                if (match) {
+                    if (r.Shifts.Count > 0) {
                         if (e != null) {
+                            // add employees required shift for this day
                             if (!d.Shifts.ContainsKey(e.Value))
-                                d.Shifts.Add(e.Value, r.Shift.Shift);
+                                d.Shifts.Add(e.Value, r.Shifts[0].Shift);
                         } else {
-                            d.RequiredShifts.Add(r.Shift.Shift);
+                            // indicate that a specific shift must be filled by an employee
+                            r.Shifts.ForEach(shift => {
+                                if (d.RequiredShifts.TryGetValue(shift.Shift, out int count))
+                                    d.RequiredShifts[shift.Shift] = ++count;
+                                else
+                                    d.RequiredShifts.Add(shift.Shift, 1);
+                            });
                         }
                     } else {
+                        // indicate that an employee must work this day, no specific shift
                         if (e != null && !d.ExcludedEmployees.Contains(e.Value))
                             d.RequiredEmployees.Add(e.Value);
                     }
@@ -141,7 +149,7 @@ namespace ScheduleApi.Utils {
 
             Debug.WriteLine(PrintSchedules(schedules));
 
-            return schedules.Values.ToList();
+            return schedules.Values.Where(s => s.Start != null && s.End != null).ToList();
         }
 
         private Dictionary<EmployeeDay, Schedule> GenerateSchedules(List<Employee> employees) {
@@ -161,12 +169,11 @@ namespace ScheduleApi.Utils {
 
             // if this day requires certain shifts find an employee to fill them
             Debug.WriteLine("RequiredShifts--------------------------------------");
-            Dictionary<int, List<TimeRange>> unassigned;
-            unassigned = AssignRequiredShifts(employees, schedules);
+            AssignRequiredShifts(employees, schedules);
 
             // meet hours quotas if they exist for each employee
             Debug.WriteLine("HoursQota--------------------------------------");
-            AssignRemainingHours(employees, schedules, unassigned);
+            AssignRemainingHours(employees, schedules);
 
             Debug.WriteLine("totalHours");
             foreach (KeyValuePair<int, double> item in _totalHours) {
@@ -178,7 +185,7 @@ namespace ScheduleApi.Utils {
         }
 
         private void AssignFullShifts(Dictionary<EmployeeDay, Schedule> schedules) {
-            _schedules.ForEach(dayReq => {
+            _dayRequirements.ForEach(dayReq => {
                 // full employee shifts already set in requirements
                 if (dayReq.Shifts.Count > 0) {
                     Debug.WriteLine("assigining full shifts for " + ReverseDays[dayReq.Day]);
@@ -205,7 +212,7 @@ namespace ScheduleApi.Utils {
         }
 
         private void AssignRequiredEmployees(Dictionary<EmployeeDay, Schedule> schedules) {
-            _schedules.ForEach(dayReq => {
+            _dayRequirements.ForEach(dayReq => {
                 // create a schedule on this day for each required employee
                 if (dayReq.RequiredEmployees.Count > 0) {
                     Debug.WriteLine("Assigning required employees on " + ReverseDays[dayReq.Day]);
@@ -226,91 +233,104 @@ namespace ScheduleApi.Utils {
                             schedule.End = shift.End;
 
                             double hours = _totalHours[key.EmployeeId] + GetHours(shift);
-                            //HoursQuotaMet(hours, key.EmployeeId);
                             _totalHours[key.EmployeeId] = hours;
-                            Debug.WriteLine("adding schedule: " + key.EmployeeId + ", " + ReverseDays[dayReq.Day]);
+                        } else if (dayReq.RequiredShifts.Count > 0) {
+                            // find an unfilled required shift
+                            Debug.WriteLine("finding a shift");
+                            foreach(KeyValuePair<TimeRange, int> reqShift in dayReq.RequiredShifts) {
+                                if (reqShift.Value <= 0) {
+                                    continue;
+                                }
 
+                                Debug.WriteLine("reqShift: " + reqShift);
+                                schedule.Start = reqShift.Key.Start;
+                                schedule.End = reqShift.Key.End;
+                                dayReq.RequiredShifts[reqShift.Key] = reqShift.Value - 1;
+
+                                double hours = _totalHours[key.EmployeeId] + GetHours(reqShift.Key);
+                                _totalHours[key.EmployeeId] = hours;
+                                break;
+                            }
                         }
 
+                        Debug.WriteLine("adding schedule: " + key.EmployeeId + ", " + ReverseDays[dayReq.Day]);
                         schedules.Add(key, schedule);
                     }
                 }
             });
         }
 
-        private Dictionary<int, List<TimeRange>> AssignRequiredShifts(List<Employee> employees,
+        private void AssignRequiredShifts(List<Employee> employees,
             Dictionary<EmployeeDay, Schedule> schedules) {
             Dictionary<int, List<TimeRange>> unassignedReqShifts = new();
 
             int index = 0;
-            foreach (RequirementsDay dayReq in _schedules) {
+            foreach (RequirementsDay dayReq in _dayRequirements) {
                 if (dayReq.RequiredShifts.Count < 0)
                     continue;
 
                 unassignedReqShifts.Add(index, new());
 
-                foreach (TimeRange reqShift in dayReq.RequiredShifts) {
-                    Debug.WriteLine("reqShift: " + ReverseDays[dayReq.Day] + ", " + reqShift);
-                    bool assigned = false;
-                    foreach (Employee e in employees) {
-                        double hours = _totalHours[e.EmployeeId] + GetHours(reqShift);
-                        HoursQuotaMet(hours, e.EmployeeId, out double remain);
-                        if (remain < 0) {
-                            Debug.WriteLine("unable to add hours for employee: " + e.EmployeeId);
-                            continue;
-                        }
+                foreach (KeyValuePair<TimeRange, int> reqShift in dayReq.RequiredShifts) {
+                    if (reqShift.Value <= 0)
+                        continue;
 
-                        EmployeeDay key = new(e.EmployeeId, dayReq.Day);
-                        Schedule schedule = new();
-                        bool add = true;
-                        if (schedules.ContainsKey(key)) {
-                            schedule = schedules[key];
-                            add = false;
-                        }
-
-                        // schedule already has a shift assigned for this employee
-                        if (schedule.Start != null) {
-                            Debug.WriteLine(e.EmployeeId + " already assigned to this day");
-                            continue;
-                        }
-
-                        //ignore this shift for this employee if it exists in excluded shifts
-                        if (_excludedEmployeeShifts.TryGetValue(e.EmployeeId, out TimeRange exShift)) {
-                            if (exShift.Equals(reqShift)) {
-                                Debug.WriteLine(e.EmployeeId + " is excluded from this shift");
+                    for (int i = 0; i < reqShift.Value; ++i) {
+                        Debug.WriteLine("reqShift: " + ReverseDays[dayReq.Day] + ", " + reqShift.Key);
+                        bool assigned = false;
+                        foreach (Employee e in employees) {
+                            double hours = _totalHours[e.EmployeeId] + GetHours(reqShift.Key);
+                            HoursQuotaMet(hours, e.EmployeeId, out double remain);
+                            if (remain < 0) {
+                                Debug.WriteLine("unable to add hours for employee: " + e.EmployeeId);
                                 continue;
                             }
+
+                            EmployeeDay key = new(e.EmployeeId, dayReq.Day);
+                            Schedule schedule = new();
+                            bool add = true;
+                            if (schedules.ContainsKey(key)) {
+                                schedule = schedules[key];
+                                add = false;
+                            }
+
+                            // schedule already has a shift assigned for this employee
+                            if (schedule.Start != null) {
+                                Debug.WriteLine(e.EmployeeId + " already assigned to this day");
+                                continue;
+                            }
+
+                            //ignore this shift for this employee if it exists in excluded shifts
+                            if (_excludedEmployeeShifts.TryGetValue(e.EmployeeId, out TimeRange exShift)) {
+                                if (exShift.Equals(reqShift)) {
+                                    Debug.WriteLine(e.EmployeeId + " is excluded from this shift");
+                                    continue;
+                                }
+                            }
+
+                            Debug.WriteLine("adding schedule: " + key.EmployeeId + ", " + ReverseDays[dayReq.Day]);
+                            schedule.Start = reqShift.Key.Start;
+                            schedule.End = reqShift.Key.End;
+                            dayReq.RequiredShifts[reqShift.Key] = reqShift.Value - 1;
+                            _totalHours[key.EmployeeId] = hours;
+
+                            if (add) {
+                                schedule.EmployeeId = key.EmployeeId;
+                                schedule.Day = key.Day;
+                                schedules.Add(key, schedule);
+                            }
+
+                            assigned = true;
+                            break;
                         }
-
-                        Debug.WriteLine("adding schedule: " + key.EmployeeId + ", " + ReverseDays[dayReq.Day]);
-                        schedule.Start = reqShift.Start;
-                        schedule.End = reqShift.End;
-                        _totalHours[key.EmployeeId] = hours;
-
-                        if (add) {
-                            schedule.EmployeeId = key.EmployeeId;
-                            schedule.Day = key.Day;
-                            schedules.Add(key, schedule);
-                        }
-
-                        assigned = true;
-                        break;
-                    }
-
-                    if (!assigned) {
-                        Debug.WriteLine(dayReq.Day + ", " + reqShift + ", unassigned-------------------");
-                        unassignedReqShifts[index].Add(reqShift);
                     }
                 }
                 ++index;
             }
-
-            return unassignedReqShifts;
         }
 
         private void AssignRemainingHours(List<Employee> employees,
-            Dictionary<EmployeeDay, Schedule> schedules, Dictionary<int, List<TimeRange>> unassigned) {
-            Debug.WriteLine("unassigned: " + unassigned.Count);
+            Dictionary<EmployeeDay, Schedule> schedules) {
             foreach (Employee e in employees) {
                 if (!_employeeHours.TryGetValue(e.EmployeeId, out _)) {
                     Debug.WriteLine("employee: " + e.EmployeeId + " has no hours quota");
@@ -329,16 +349,22 @@ namespace ScheduleApi.Utils {
         }
 
         private void FindShifts(int employee, Dictionary<EmployeeDay, Schedule> schedules, double remain) {
-            foreach (RequirementsDay reqDay in _schedules) {
+            foreach (RequirementsDay reqDay in _dayRequirements) {
                 EmployeeDay key = new(employee, reqDay.Day);
 
                 // employee already scheduled this day
                 if (schedules.ContainsKey(key))
                     continue;
 
+                // employee excluded from this day
+                if (reqDay.ExcludedEmployees.Contains(key.EmployeeId))
+                    continue;
+
                 // find a shift in required shifts for this day
-                foreach (TimeRange reqShift in reqDay.RequiredShifts) {
-                    Debug.WriteLine(ReverseDays[reqDay.Day] + ", " + reqShift);
+                foreach (KeyValuePair<TimeRange, int> reqShift in reqDay.RequiredShifts) {
+                    Debug.WriteLine(ReverseDays[reqDay.Day] + ", " + reqShift.Key);
+                    //if (reqShift.Value <= 0)
+                    //    continue;
                     //ignore this shift for this employee if it exists in excluded shifts
                     if (_excludedEmployeeShifts.TryGetValue(employee, out TimeRange exShift)) {
                         if (exShift.Equals(reqShift)) {
@@ -352,11 +378,13 @@ namespace ScheduleApi.Utils {
                     Schedule schedule = new Schedule() {
                         Day = reqDay.Day,
                         EmployeeId = employee,
-                        Start = reqShift.Start,
-                        End = reqShift.End,
+                        Start = reqShift.Key.Start,
+                        End = reqShift.Key.End,
                     };
                     schedules.Add(key, schedule);
-                    double hours = GetHours(reqShift);
+                    double hours = GetHours(reqShift.Key);
+                    reqDay.RequiredShifts[reqShift.Key] = reqShift.Value - 1;
+
                     _totalHours[key.EmployeeId] += hours;
 
                     remain -= hours;
@@ -367,6 +395,15 @@ namespace ScheduleApi.Utils {
                 }
             }
         }
+
+        //private static bool RequiredShiftAssigned(KeyValuePair<TimeRange, int> reqShift, int day,
+        //    Dictionary<EmployeeDay, Schedule> schedules) {
+        //    return schedules.Values.Any(s =>
+        //                            s.Start != null && s.End != null &&
+        //                            s.Day == day &&
+        //                            s.Start.Equals(reqShift.Start) &&
+        //                            s.End.Equals(reqShift.End));
+        //}
 
         private static double GetHours(TimeRange shift) {
             if (!DateTime.TryParse(shift.Start, out DateTime start) ||
@@ -426,7 +463,7 @@ namespace ScheduleApi.Utils {
                 str += "[" + hours.Key + ", " + hours.Value.Operator + ", " + hours.Value.Value + "],";
             }
             str += "\n";
-            _schedules.ForEach(s => str += s.ToString() + "\n");
+            _dayRequirements.ForEach(s => str += s.ToString() + "\n");
 
             return str;
         }
@@ -436,7 +473,7 @@ namespace ScheduleApi.Utils {
             public HashSet<int> ExcludedEmployees = new();
             public HashSet<int> RequiredEmployees = new();
             public Dictionary<int, TimeRange> Shifts = new();
-            public HashSet<TimeRange> RequiredShifts = new();
+            public Dictionary<TimeRange, int> RequiredShifts = new();
             public override string ToString() { 
                 string str = "GenScheduleDay\n";
                 str += "   Day: " + ReverseDays[Day] + "\n";
@@ -449,7 +486,7 @@ namespace ScheduleApi.Utils {
                     str += "[" + item.Key + ", " + item.Value.Start + ", " + item.Value.End + "], ";
                 }
                 str += "\n   requiredShifts: ";
-                foreach (TimeRange s in RequiredShifts) { str += "[" + s.Start + ", " + s.End + "], "; };
+                foreach (TimeRange s in RequiredShifts.Keys) { str += "[" + s.Start + ", " + s.End + "], "; };
 
                 return str;
             }

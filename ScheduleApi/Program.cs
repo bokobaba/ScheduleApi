@@ -1,7 +1,6 @@
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.OpenApi.Models;
 using ScheduleApi.Data;
 using ScheduleApi.Extensions;
@@ -14,9 +13,6 @@ using ScheduleApi.Services.RuleGroupService;
 using ScheduleApi.Services.ScheduleService;
 using ScheduleApi.Services.ShiftService;
 using Swashbuckle.AspNetCore.Filters;
-using System.Reflection;
-using System;
-using System.Reflection.Metadata.Ecma335;
 
 var builder = WebApplication.CreateBuilder(args);
 

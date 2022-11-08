@@ -224,6 +224,7 @@ namespace ScheduleApi.Services.ScheduleService {
                 .Include(e => e.Requests).Include(e => e.Availability)
                 .ToListAsync();
 
+            employees.RemoveRange(4, employees.Count - 4);
             List<Schedule> schedules = GenerateSchedules(rules, shifts, employees);
             schedules.ForEach(s => {
                 s.UserId = userId;
