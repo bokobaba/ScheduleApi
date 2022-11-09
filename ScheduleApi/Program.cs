@@ -1,4 +1,5 @@
 using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -20,15 +21,18 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Logging.AddConsole();
 
 //set up azure app configuration
-builder.Configuration.AddAzureAppConfiguration(options => {
-    options.Connect(builder.Configuration.GetConnectionString("AppConfig"))
-    .ConfigureKeyVault(kv => {
-        kv.SetCredential(new DefaultAzureCredential());
-    }).ConfigureRefresh(refresh => {
-        refresh.Register("refreshAll", true);
-        refresh.SetCacheExpiration(TimeSpan.FromSeconds(5));
+
+if (builder.Environment.IsDevelopment()) {
+    builder.Configuration.AddAzureAppConfiguration(options => {
+        options.Connect(builder.Configuration.GetConnectionString("AppConfig"))
+        .ConfigureKeyVault(kv => {
+            kv.SetCredential(new DefaultAzureCredential());
+        }).ConfigureRefresh(refresh => {
+            refresh.Register("refreshAll", true);
+            refresh.SetCacheExpiration(TimeSpan.FromSeconds(5));
+        });
     });
-});
+}
 
 // Add services to the container.
 
@@ -70,7 +74,6 @@ builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IRuleGroupService, RuleGroupService>();
 builder.Services.AddScoped<IShiftService, ShiftService>();
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
-
 
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
