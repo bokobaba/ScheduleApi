@@ -330,7 +330,7 @@ namespace ScheduleApiTest.Systems.Controllers {
             response2.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
-        [Fact]
+        //[Fact]
         public async Task Schedules_Generate_Schedules_ReturnSuccess() {
             //Arrange
             string url = "/api/Schedules/GenerateSchedules";
