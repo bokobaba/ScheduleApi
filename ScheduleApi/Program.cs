@@ -22,7 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 //set up azure app configuration
 
-if (builder.Environment.IsDevelopment()) {
+if (builder.Configuration["ScheduleApi:Auth0:Domain"].StartsWith("#{")) {
     builder.Configuration.AddAzureAppConfiguration(options => {
         options.Connect(builder.Configuration.GetConnectionString("AppConfig"))
         .ConfigureKeyVault(kv => {
