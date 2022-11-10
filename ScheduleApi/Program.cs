@@ -57,7 +57,7 @@ var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 //if (!builder.Environment.IsProduction()) {
     builder.Services.AddCors(options => {
         options.AddPolicy(myAllowSpecificOrigins, policy => {
-            policy.WithOrigins("https://kind-beach-011a71a10.2.azurestaticapps.net")
+            policy.WithOrigins(builder.Configuration["Cors:Origin"])
             .AllowAnyMethod()
             .AllowAnyHeader();
         });
