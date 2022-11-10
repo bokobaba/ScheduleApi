@@ -54,13 +54,15 @@ builder.Services.AddSwaggerGen(options => {
 
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-builder.Services.AddCors(options => {
-    options.AddPolicy(myAllowSpecificOrigins, policy => {
-        policy.WithOrigins(builder.Configuration["Cors:Origin"])
-        .AllowAnyMethod()
-        .AllowAnyHeader();
+if (!builder.Environment.IsProduction()) {
+    builder.Services.AddCors(options => {
+        options.AddPolicy(myAllowSpecificOrigins, policy => {
+            policy.WithOrigins(builder.Configuration["Cors:Origin"])
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+        });
     });
-});
+}
 
 builder.Services.AddHttpContextAccessor();
 
