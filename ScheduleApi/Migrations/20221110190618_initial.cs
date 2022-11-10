@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ScheduleApi.Migrations
 {
+    /// <inheritdoc />
     public partial class initial : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -26,6 +28,39 @@ namespace ScheduleApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RuleGroups",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<bool>(type: "bit", nullable: false),
+                    Rules = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RuleGroups", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Shifts",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Start = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    End = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Shifts", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -39,6 +74,31 @@ namespace ScheduleApi.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Availability",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Day = table.Column<int>(type: "int", nullable: false),
+                    Enabled = table.Column<bool>(type: "bit", nullable: false),
+                    AllDay = table.Column<bool>(type: "bit", nullable: false),
+                    Start = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    End = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Availability", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Availability_Employees_UserId_EmployeeId",
+                        columns: x => new { x.UserId, x.EmployeeId },
+                        principalTable: "Employees",
+                        principalColumns: new[] { "UserId", "EmployeeId" },
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -73,8 +133,8 @@ namespace ScheduleApi.Migrations
                     Year = table.Column<int>(type: "int", nullable: false),
                     Week = table.Column<int>(type: "int", nullable: false),
                     Day = table.Column<int>(type: "int", nullable: false),
-                    Start = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    End = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Start = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    End = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -90,7 +150,7 @@ namespace ScheduleApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RefreshTokens",
+                name: "UserRefreshToken",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -105,9 +165,9 @@ namespace ScheduleApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RefreshTokens", x => x.ID);
+                    table.PrimaryKey("PK_UserRefreshToken", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_RefreshTokens_Users_UserId",
+                        name: "FK_UserRefreshToken_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "ID",
@@ -115,15 +175,16 @@ namespace ScheduleApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Availability_UserId_EmployeeId_Day",
+                table: "Availability",
+                columns: new[] { "UserId", "EmployeeId", "Day" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Employees_UserId_EmployeeId",
                 table: "Employees",
                 columns: new[] { "UserId", "EmployeeId" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RefreshTokens_UserId",
-                table: "RefreshTokens",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Requests_UserId_EmployeeId",
@@ -140,24 +201,39 @@ namespace ScheduleApi.Migrations
                 table: "Schedules",
                 columns: new[] { "UserId", "Week", "Year", "EmployeeId", "Day" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserRefreshToken_UserId",
+                table: "UserRefreshToken",
+                column: "UserId");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "RefreshTokens");
+                name: "Availability");
 
             migrationBuilder.DropTable(
                 name: "Requests");
 
             migrationBuilder.DropTable(
+                name: "RuleGroups");
+
+            migrationBuilder.DropTable(
                 name: "Schedules");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Shifts");
+
+            migrationBuilder.DropTable(
+                name: "UserRefreshToken");
 
             migrationBuilder.DropTable(
                 name: "Employees");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

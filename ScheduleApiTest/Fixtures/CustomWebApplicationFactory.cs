@@ -49,7 +49,9 @@ namespace ScheduleApiTest.Fixtures {
                     var logger = scopedServices
                         .GetRequiredService<ILogger<CustomWebApplicationFactory<Program>>>();
 
+                    Console.WriteLine("Deleting Database");
                     db.Database.EnsureDeleted();
+                    Console.WriteLine("Creating Database");
                     db.Database.EnsureCreated();
 
                     try {
