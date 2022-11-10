@@ -54,15 +54,15 @@ builder.Services.AddSwaggerGen(options => {
 
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-if (!builder.Environment.IsProduction()) {
+//if (!builder.Environment.IsProduction()) {
     builder.Services.AddCors(options => {
         options.AddPolicy(myAllowSpecificOrigins, policy => {
-            policy.WithOrigins(builder.Configuration["Cors:Origin"])
+            policy.WithOrigins("https://kind-beach-011a71a10.2.azurestaticapps.net")
             .AllowAnyMethod()
             .AllowAnyHeader();
         });
     });
-}
+//}
 
 builder.Services.AddHttpContextAccessor();
 
@@ -128,9 +128,11 @@ if (!app.Environment.IsProduction()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    app.UseCors(myAllowSpecificOrigins);
 
 }
+
+app.UseCors(myAllowSpecificOrigins);
+
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
